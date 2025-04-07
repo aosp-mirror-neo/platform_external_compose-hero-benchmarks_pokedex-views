@@ -1,0 +1,17 @@
+name: "pokedex-views"
+description:
+    "🗡️ Pokedex demonstrates modern Android development with Hilt, Material "
+    "Motion, Coroutines, Flow, Jetpack (Room, ViewModel) based on MVVM "
+    "architecture."
+
+third_party {
+  identifier {
+    type: "Git"
+    value: "https://github.com/skydoves/pokedex"
+    primary_source: true
+    version: "1f0b6c1627cf864809b77ed411811f6f2cfc8acf"
+  }
+  version: "1f0b6c1627cf864809b77ed411811f6f2cfc8acf"
+  last_upgrade_date { year: 2024 month: 11 day: 11 }
+  license_type: NOTICE
+}
