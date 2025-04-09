@@ -23,17 +23,14 @@ import com.skydoves.bindables.BindingViewModel
 import com.skydoves.bindables.asBindingProperty
 import com.skydoves.bindables.bindingProperty
 import com.skydoves.pokedex.core.model.Pokemon
-import com.skydoves.pokedex.core.repository.MainRepository
+import com.skydoves.pokedex.core.repository.home.HomeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import timber.log.Timber
 import javax.inject.Inject
 
-@HiltViewModel
-class MainViewModel @Inject constructor(
-  private val mainRepository: MainRepository,
-) : BindingViewModel() {
+internal class PokedexViewsHomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
 
   @get:Bindable
   var isLoading: Boolean by bindingProperty(false)
@@ -45,7 +42,7 @@ class MainViewModel @Inject constructor(
 
   private val pokemonFetchingIndex: MutableStateFlow<Int> = MutableStateFlow(0)
   private val pokemonListFlow = pokemonFetchingIndex.flatMapLatest { page ->
-    mainRepository.fetchPokemonList(
+    homeRepository.fetchPokemonList(
       page = page,
       onStart = { isLoading = true },
       onComplete = { isLoading = false },

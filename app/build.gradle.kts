@@ -33,6 +33,13 @@ android {
   defaultConfig {
     applicationId = "com.skydoves.pokedex"
     testInstrumentationRunner = "com.skydoves.pokedex.AppTestRunner"
+
+    // The schemas directory contains a schema file for each version of the Room database.
+    // This is required to enable Room auto migrations.
+    // See https://developer.android.com/reference/kotlin/androidx/room/AutoMigration.
+    ksp {
+      arg("room.schemaLocation", "$projectDir/schemas")
+    }
   }
 
   buildFeatures {
@@ -85,13 +92,11 @@ dependencies {
   testImplementation(projects.coreNetwork)
   testImplementation(projects.coreDatabase)
   testImplementation(projects.coreTest)
-  androidTestImplementation(projects.coreTest)
 
   // androidx
   implementation(libs.material)
   implementation(libs.androidx.fragment)
   implementation(libs.androidx.lifecycle)
-  implementation(libs.androidx.startup)
   implementation(libs.androidx.palette)
 
   // data binding
@@ -127,15 +132,68 @@ dependencies {
   implementation(libs.androidRibbon)
   implementation(libs.progressView)
 
-  // unit test
-  testImplementation(libs.junit)
-  testImplementation(libs.turbine)
-  testImplementation(libs.androidx.test.core)
-  testImplementation(libs.mockito.core)
-  testImplementation(libs.mockito.kotlin)
+  // coroutines
+  implementation(libs.coroutines)
+  testImplementation(libs.coroutines)
   testImplementation(libs.coroutines.test)
-  androidTestImplementation(libs.truth)
-  androidTestImplementation(libs.androidx.junit)
-  androidTestImplementation(libs.androidx.espresso)
-  androidTestImplementation(libs.android.test.runner)
+
+  // network
+  implementation(libs.sandwich)
+  implementation(libs.retrofit)
+  implementation(libs.retrofit.moshi)
+  implementation(libs.okhttp.interceptor)
+
+  // json parsing
+  implementation(libs.moshi)
+  ksp(libs.moshi.codegen)
+
+  // di
+  implementation(libs.hilt.android)
+  ksp(libs.hilt.compiler)
+
+  // From core-model
+  // json parsing
+  implementation(libs.moshi)
+  ksp(libs.moshi.codegen)
+
+  // ----
+  // From core-database
+  // Room
+  // coroutines
+  implementation(libs.coroutines)
+  testImplementation(libs.coroutines)
+  testImplementation(libs.coroutines.test)
+
+  // database
+  implementation(libs.androidx.room.runtime)
+  implementation(libs.androidx.room.ktx)
+  ksp(libs.androidx.room.compiler)
+  testImplementation(libs.androidx.arch.core)
+
+  // json parsing
+  implementation(libs.moshi)
+  ksp(libs.moshi.codegen)
+
+  // di
+  implementation(libs.hilt.android)
+  ksp(libs.hilt.compiler)
+
+  // ---
+  // From core-data
+  implementation(projects.coreNetwork)
+  implementation(projects.coreDatabase)
+  testImplementation(projects.coreTest)
+
+  // coroutines
+  implementation(libs.coroutines)
+  testImplementation(libs.coroutines)
+  testImplementation(libs.coroutines.test)
+
+  // network
+  implementation(libs.sandwich)
+
+  // di
+  implementation(libs.hilt.android)
+  ksp(libs.hilt.compiler)
+
 }
