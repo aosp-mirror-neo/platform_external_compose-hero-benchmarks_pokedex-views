@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.skydoves.baserecyclerviewadapter.RecyclerViewPaginator
 import com.skydoves.bindables.BindingListAdapter
 import com.skydoves.pokedex.ui.main.MainViewModel
-import com.skydoves.whatif.whatIfNotNullAs
 
 object RecyclerViewBinding {
 
@@ -36,9 +35,8 @@ object RecyclerViewBinding {
   @JvmStatic
   @BindingAdapter("submitList")
   fun bindSubmitList(view: RecyclerView, itemList: List<Any>?) {
-    view.adapter.whatIfNotNullAs<BindingListAdapter<Any, *>> { adapter ->
-      adapter.submitList(itemList)
-    }
+    @Suppress("UNCHECKED_CAST")
+    (view.adapter as? BindingListAdapter<Any, *>)?.submitList(itemList)
   }
 
   @JvmStatic

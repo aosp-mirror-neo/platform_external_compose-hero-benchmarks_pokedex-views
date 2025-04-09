@@ -18,20 +18,16 @@ package com.skydoves.pokedex.core.network.service
 
 import com.skydoves.pokedex.core.model.PokemonInfo
 import com.skydoves.pokedex.core.network.model.PokemonResponse
-import com.skydoves.sandwich.ApiResponse
-import javax.inject.Inject
 
-class PokedexClient @Inject constructor(
-  private val pokedexService: PokedexService,
-) {
+class PokedexClient(private val pokedexService: PokedexService) {
 
-  suspend fun fetchPokemonList(page: Int): ApiResponse<PokemonResponse> =
+  suspend fun fetchPokemonList(page: Int): Result<PokemonResponse> =
     pokedexService.fetchPokemonList(
       limit = PAGING_SIZE,
       offset = page * PAGING_SIZE,
     )
 
-  suspend fun fetchPokemonInfo(name: String): ApiResponse<PokemonInfo> =
+  suspend fun fetchPokemonInfo(name: String): Result<PokemonInfo> =
     pokedexService.fetchPokemonInfo(
       name = name,
     )

@@ -24,11 +24,10 @@ import com.skydoves.bindables.asBindingProperty
 import com.skydoves.bindables.bindingProperty
 import com.skydoves.pokedex.core.model.Pokemon
 import com.skydoves.pokedex.core.repository.home.HomeRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import timber.log.Timber
-import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 internal class PokedexViewsHomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
 
@@ -41,6 +40,7 @@ internal class PokedexViewsHomeViewModel(private val homeRepository: HomeReposit
     private set
 
   private val pokemonFetchingIndex: MutableStateFlow<Int> = MutableStateFlow(0)
+  @OptIn(ExperimentalCoroutinesApi::class)
   private val pokemonListFlow = pokemonFetchingIndex.flatMapLatest { page ->
     homeRepository.fetchPokemonList(
       page = page,

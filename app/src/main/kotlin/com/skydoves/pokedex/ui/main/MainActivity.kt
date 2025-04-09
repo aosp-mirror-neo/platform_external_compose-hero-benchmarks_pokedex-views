@@ -18,18 +18,18 @@ package com.skydoves.pokedex.ui.main
 
 import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.annotation.VisibleForTesting
 import com.skydoves.bindables.BindingActivity
 import com.skydoves.pokedex.R
+import com.skydoves.pokedex.core.PokedexViewsViewModelProviderFactory
+import com.skydoves.pokedex.core.di.ModuleLocator
 import com.skydoves.pokedex.databinding.ActivityMainBinding
 import com.skydoves.transformationlayout.onTransformationStartContainer
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
 class MainActivity : BindingActivity<ActivityMainBinding>(R.layout.activity_main) {
 
-  @get:VisibleForTesting
-  internal val viewModel: MainViewModel by viewModels()
+  internal val viewModel: MainViewModel by viewModels {
+    PokedexViewsViewModelProviderFactory(ModuleLocator.repositoryModule)
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     onTransformationStartContainer()

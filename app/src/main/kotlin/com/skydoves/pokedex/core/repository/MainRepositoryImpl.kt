@@ -16,31 +16,22 @@
 
 package com.skydoves.pokedex.core.repository
 
-import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.skydoves.pokedex.core.database.PokemonDao
 import com.skydoves.pokedex.core.database.entity.mapper.asDomain
 import com.skydoves.pokedex.core.database.entity.mapper.asEntity
 import com.skydoves.pokedex.core.model.Pokemon
-import com.skydoves.pokedex.core.network.Dispatcher
-import com.skydoves.pokedex.core.network.PokedexAppDispatchers
 import com.skydoves.pokedex.core.network.service.PokedexClient
-import com.skydoves.sandwich.ApiResponse
-import com.skydoves.sandwich.message
-import com.skydoves.sandwich.onFailure
-import com.skydoves.sandwich.suspendOnSuccess
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
-import javax.inject.Inject
 
-@VisibleForTesting
-class MainRepositoryImpl @Inject constructor(
+class MainRepositoryImpl(
   private val pokedexClient: PokedexClient,
   private val pokemonDao: PokemonDao,
-  @Dispatcher(PokedexAppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
+  private val ioDispatcher: CoroutineDispatcher,
 ) : MainRepository {
 
   @WorkerThread
@@ -52,18 +43,14 @@ class MainRepositoryImpl @Inject constructor(
   ) = flow {
     var pokemons = pokemonDao.getPokemonList(page).asDomain()
     if (pokemons.isEmpty()) {
-      /**
-       * fetches a list of [Pokemon] from the network and getting [ApiResponse] asynchronously.
-       * @see [suspendOnSuccess](https://github.com/skydoves/sandwich#apiresponse-extensions-for-coroutines)
-       */
       val response = pokedexClient.fetchPokemonList(page = page)
-      response.suspendOnSuccess {
-        pokemons = data.results
+      if (response.isSuccess) {
+        pokemons = response.getOrThrow().results
         pokemons.forEach { pokemon -> pokemon.page = page }
         pokemonDao.insertPokemonList(pokemons.asEntity())
         emit(pokemonDao.getAllPokemonList(page).asDomain())
-      }.onFailure { // handles the all error cases from the API request fails.
-        onError(message())
+      } else {
+        onError(response.exceptionOrNull()?.message)
       }
     } else {
       emit(pokemonDao.getAllPokemonList(page).asDomain())

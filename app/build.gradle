@@ -37,8 +37,7 @@ android {
   }
 
   buildFeatures {
-    dataBinding = false
-    viewBinding = true
+    dataBinding = true
     buildConfig = true
   }
 }
@@ -60,6 +59,7 @@ dependencies {
     ksp("androidx.room:room-compiler:2.7.0-rc03")
 
     // SkyDoves Libraries
+    implementation("com.github.skydoves:bindables:1.1.0")
     implementation("com.github.skydoves:rainbow:1.0.4")
     implementation("com.github.skydoves:androidribbon:1.0.4")
     implementation("com.github.skydoves:progressview:1.1.3")

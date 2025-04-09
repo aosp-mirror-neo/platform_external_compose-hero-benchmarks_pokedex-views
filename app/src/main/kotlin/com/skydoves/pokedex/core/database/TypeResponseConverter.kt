@@ -22,12 +22,9 @@ import com.skydoves.pokedex.core.model.PokemonInfo
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import javax.inject.Inject
 
 @ProvidedTypeConverter
-class TypeResponseConverter @Inject constructor(
-  private val moshi: Moshi,
-) {
+class TypeResponseConverter(private val moshi: Moshi) {
 
   @TypeConverter
   fun fromString(value: String): List<PokemonInfo.TypeResponse>? {

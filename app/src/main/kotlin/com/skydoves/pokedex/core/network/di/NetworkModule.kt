@@ -16,51 +16,32 @@
 
 package com.skydoves.pokedex.core.network.di
 
-import com.skydoves.pokedex.core.network.interceptor.HttpRequestInterceptor
 import com.skydoves.pokedex.core.network.service.PokedexClient
 import com.skydoves.pokedex.core.network.service.PokedexService
-import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import javax.inject.Singleton
 
-@Module
-@InstallIn(SingletonComponent::class)
-internal object NetworkModule {
+class NetworkModule {
 
-  @Provides
-  @Singleton
-  fun provideOkHttpClient(): OkHttpClient {
-    return OkHttpClient.Builder()
-      .addInterceptor(HttpRequestInterceptor())
+  val okHttpClient: OkHttpClient by lazy {
+    OkHttpClient.Builder()
       .build()
   }
 
-  @Provides
-  @Singleton
-  fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-    return Retrofit.Builder()
+  val retrofit: Retrofit by lazy {
+    Retrofit.Builder()
       .client(okHttpClient)
       .baseUrl("https://pokeapi.co/api/v2/")
       .addConverterFactory(MoshiConverterFactory.create())
-      .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
       .build()
   }
 
-  @Provides
-  @Singleton
-  fun providePokedexService(retrofit: Retrofit): PokedexService {
-    return retrofit.create(PokedexService::class.java)
+  val pokedexService: PokedexService by lazy {
+    retrofit.create(PokedexService::class.java)
   }
 
-  @Provides
-  @Singleton
-  fun providePokedexClient(pokedexService: PokedexService): PokedexClient {
-    return PokedexClient(pokedexService)
+  val pokedexClient: PokedexClient by lazy {
+    PokedexClient(pokedexService)
   }
 }

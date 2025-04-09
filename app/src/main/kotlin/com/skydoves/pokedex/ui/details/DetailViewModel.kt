@@ -25,15 +25,14 @@ import com.skydoves.bindables.asBindingProperty
 import com.skydoves.bindables.bindingProperty
 import com.skydoves.pokedex.core.model.PokemonInfo
 import com.skydoves.pokedex.core.repository.DetailRepository
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import timber.log.Timber
 
-class DetailViewModel @AssistedInject constructor(
-  detailRepository: DetailRepository,
-  @Assisted private val pokemonName: String,
-) : BindingViewModel() {
+class DetailViewModel(detailRepository: DetailRepository) : BindingViewModel() {
 
   @get:Bindable
   var isLoading: Boolean by bindingProperty(true)
@@ -43,34 +42,24 @@ class DetailViewModel @AssistedInject constructor(
   var toastMessage: String? by bindingProperty(null)
     private set
 
-  private val pokemonInfoFlow: Flow<PokemonInfo?> = detailRepository.fetchPokemonInfo(
-    name = pokemonName,
-    onComplete = { isLoading = false },
-    onError = { toastMessage = it },
-  )
+  val pokemonName = MutableStateFlow<String?>(null)
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  private val pokemonInfoFlow: Flow<PokemonInfo?> =
+    pokemonName
+      .filterNotNull()
+      .flatMapLatest { pokemonName ->
+        detailRepository.fetchPokemonInfo(
+          name = pokemonName,
+          onComplete = { isLoading = false },
+          onError = { toastMessage = it },
+        )
+      }
 
   @get:Bindable
   val pokemonInfo: PokemonInfo? by pokemonInfoFlow.asBindingProperty(viewModelScope, null)
 
   init {
     Timber.d("init DetailViewModel")
-  }
-
-  @dagger.assisted.AssistedFactory
-  interface AssistedFactory {
-    fun create(pokemonName: String): DetailViewModel
-  }
-
-  companion object {
-    fun provideFactory(
-      assistedFactory: AssistedFactory,
-      pokemonName: String,
-    ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-
-      @Suppress("UNCHECKED_CAST")
-      override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return assistedFactory.create(pokemonName) as T
-      }
-    }
   }
 }

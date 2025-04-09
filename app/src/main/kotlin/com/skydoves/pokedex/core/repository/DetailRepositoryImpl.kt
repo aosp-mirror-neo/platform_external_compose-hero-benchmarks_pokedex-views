@@ -16,33 +16,20 @@
 
 package com.skydoves.pokedex.core.repository
 
-import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.skydoves.pokedex.core.database.PokemonInfoDao
 import com.skydoves.pokedex.core.database.entity.mapper.asDomain
 import com.skydoves.pokedex.core.database.entity.mapper.asEntity
-import com.skydoves.pokedex.core.model.PokemonInfo
-import com.skydoves.pokedex.core.network.Dispatcher
-import com.skydoves.pokedex.core.network.PokedexAppDispatchers
-import com.skydoves.pokedex.core.network.model.PokemonErrorResponse
-import com.skydoves.pokedex.core.network.model.mapper.ErrorResponseMapper
 import com.skydoves.pokedex.core.network.service.PokedexClient
-import com.skydoves.sandwich.ApiResponse
-import com.skydoves.sandwich.map
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
-import com.skydoves.sandwich.suspendOnSuccess
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
-import javax.inject.Inject
 
-@VisibleForTesting
-class DetailRepositoryImpl @Inject constructor(
+class DetailRepositoryImpl(
   private val pokedexClient: PokedexClient,
   private val pokemonInfoDao: PokemonInfoDao,
-  @Dispatcher(PokedexAppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
+  private val ioDispatcher: CoroutineDispatcher,
 ) : DetailRepository {
 
   @WorkerThread
@@ -50,24 +37,15 @@ class DetailRepositoryImpl @Inject constructor(
     flow {
       val pokemonInfo = pokemonInfoDao.getPokemonInfo(name)
       if (pokemonInfo == null) {
-        /**
-         * fetches a [PokemonInfo] from the network and getting [ApiResponse] asynchronously.
-         * @see [suspendOnSuccess](https://github.com/skydoves/sandwich#apiresponse-extensions-for-coroutines)
-         */
         val response = pokedexClient.fetchPokemonInfo(name = name)
-        response.suspendOnSuccess {
-          pokemonInfoDao.insertPokemonInfo(data.asEntity())
-          emit(data)
-        }
-          // handles the case when the API request gets an error response.
-          // e.g., internal server error.
-          .onError {
-            /** maps the [ApiResponse.Failure.Error] to the [PokemonErrorResponse] using the mapper. */
-            map(ErrorResponseMapper) { onError("[Code: $code]: $message") }
+        if (response.isSuccess) {
+          response.getOrThrow().let {
+            pokemonInfoDao.insertPokemonInfo(it.asEntity())
+            emit(it)
           }
-          // handles the case when the API request gets an exception response.
-          // e.g., network connection error.
-          .onException { onError(message) }
+        } else {
+          onError(response.exceptionOrNull()?.message)
+        }
       } else {
         emit(pokemonInfo.asDomain())
       }

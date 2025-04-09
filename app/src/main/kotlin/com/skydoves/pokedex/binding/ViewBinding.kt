@@ -44,15 +44,14 @@ import com.skydoves.progressview.ProgressView
 import com.skydoves.rainbow.Rainbow
 import com.skydoves.rainbow.RainbowOrientation
 import com.skydoves.rainbow.color
-import com.skydoves.whatif.whatIfNotNullOrEmpty
 
 object ViewBinding {
 
   @JvmStatic
   @BindingAdapter("toast")
   fun bindToast(view: View, text: String?) {
-    text.whatIfNotNullOrEmpty {
-      Toast.makeText(view.context, it, Toast.LENGTH_SHORT).show()
+    if (!text.isNullOrEmpty()) {
+      Toast.makeText(view.context, text, Toast.LENGTH_SHORT).show()
     }
   }
 
@@ -171,9 +170,9 @@ object ViewBinding {
   @JvmStatic
   @BindingAdapter("bindPokemonTypes")
   fun bindPokemonTypes(recyclerView: RibbonRecyclerView, types: List<PokemonInfo.TypeResponse>?) {
-    types.whatIfNotNullOrEmpty {
+    if (!types.isNullOrEmpty()) {
       recyclerView.clear()
-      for (type in it) {
+      for (type in types) {
         with(recyclerView) {
           addRibbon(
             ribbonView(context) {
