@@ -32,8 +32,6 @@ android {
 
   defaultConfig {
     applicationId = "com.skydoves.pokedex"
-    versionCode = Configuration.versionCode
-    versionName = Configuration.versionName
     testInstrumentationRunner = "com.skydoves.pokedex.AppTestRunner"
   }
 
@@ -61,14 +59,6 @@ android {
     unitTests {
       isIncludeAndroidResources = true
       isReturnDefaultValues = true
-    }
-  }
-
-  buildTypes {
-    create("benchmark") {
-      isDebuggable = true
-      signingConfig = getByName("debug").signingConfig
-      matchingFallbacks += listOf("release")
     }
   }
 }
