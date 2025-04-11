@@ -16,50 +16,38 @@
 
 package com.skydoves.pokedex.ui.details
 
-import androidx.databinding.Bindable
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.skydoves.bindables.BindingViewModel
-import com.skydoves.bindables.asBindingProperty
-import com.skydoves.bindables.bindingProperty
 import com.skydoves.pokedex.core.model.PokemonInfo
 import com.skydoves.pokedex.core.repository.DetailRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-import timber.log.Timber
+import kotlinx.coroutines.flow.stateIn
 
-class DetailViewModel(detailRepository: DetailRepository) : BindingViewModel() {
+class DetailViewModel(detailRepository: DetailRepository) : ViewModel() {
 
-  @get:Bindable
-  var isLoading: Boolean by bindingProperty(true)
-    private set
+  private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(true)
+  val isLoading: StateFlow<Boolean> = _isLoading
 
-  @get:Bindable
-  var toastMessage: String? by bindingProperty(null)
-    private set
+  private val _toastMessage: MutableStateFlow<String?> = MutableStateFlow(null)
+  val toastMessage: StateFlow<String?> = _toastMessage
 
-  val pokemonName = MutableStateFlow<String?>(null)
+  val pokemonName: MutableStateFlow<String?> = MutableStateFlow(null)
 
   @OptIn(ExperimentalCoroutinesApi::class)
-  private val pokemonInfoFlow: Flow<PokemonInfo?> =
+  val pokemonInfo: StateFlow<PokemonInfo?> =
     pokemonName
       .filterNotNull()
       .flatMapLatest { pokemonName ->
         detailRepository.fetchPokemonInfo(
           name = pokemonName,
-          onComplete = { isLoading = false },
-          onError = { toastMessage = it },
+          onComplete = { _isLoading.value = false },
+          onError = { _toastMessage.value = it },
         )
       }
-
-  @get:Bindable
-  val pokemonInfo: PokemonInfo? by pokemonInfoFlow.asBindingProperty(viewModelScope, null)
-
-  init {
-    Timber.d("init DetailViewModel")
-  }
+      .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 }

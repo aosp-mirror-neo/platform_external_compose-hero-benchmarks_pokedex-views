@@ -17,49 +17,43 @@
 package com.skydoves.pokedex.ui.main
 
 import androidx.annotation.MainThread
-import androidx.databinding.Bindable
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.skydoves.bindables.BindingViewModel
-import com.skydoves.bindables.asBindingProperty
-import com.skydoves.bindables.bindingProperty
 import com.skydoves.pokedex.core.model.Pokemon
 import com.skydoves.pokedex.core.repository.home.HomeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import timber.log.Timber
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.stateIn
 
 internal class PokedexViewsHomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
 
-  @get:Bindable
-  var isLoading: Boolean by bindingProperty(false)
-    private set
+  private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+  val isLoading: StateFlow<Boolean> = _isLoading
 
-  @get:Bindable
-  var toastMessage: String? by bindingProperty(null)
-    private set
+  private val _toastMessage: MutableStateFlow<String?> = MutableStateFlow(null)
+  val toastMessage: StateFlow<String?> = _toastMessage
 
   private val pokemonFetchingIndex: MutableStateFlow<Int> = MutableStateFlow(0)
   @OptIn(ExperimentalCoroutinesApi::class)
-  private val pokemonListFlow = pokemonFetchingIndex.flatMapLatest { page ->
-    homeRepository.fetchPokemonList(
-      page = page,
-      onStart = { isLoading = true },
-      onComplete = { isLoading = false },
-      onError = { toastMessage = it },
-    )
-  }
-
-  @get:Bindable
-  val pokemonList: List<Pokemon> by pokemonListFlow.asBindingProperty(viewModelScope, emptyList())
-
-  init {
-    Timber.d("init MainViewModel")
-  }
+  val pokemonList: StateFlow<List<Pokemon>> = pokemonFetchingIndex
+    .flatMapLatest { page ->
+      homeRepository.fetchPokemonList(
+        page = page,
+        onStart = { _isLoading.value = true },
+        onComplete = { _isLoading.value = false },
+        onError = {
+          _isLoading.value = false
+          _toastMessage.value = it
+        },
+      )
+    }
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   @MainThread
   fun fetchNextPokemonList() {
-    if (!isLoading) {
+    if (!isLoading.value) {
       pokemonFetchingIndex.value++
     }
   }

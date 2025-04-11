@@ -50,7 +50,7 @@ class MainRepositoryImpl(
         pokemonDao.insertPokemonList(pokemons.asEntity())
         emit(pokemonDao.getAllPokemonList(page).asDomain())
       } else {
-        onError(response.exceptionOrNull()?.message)
+        throw response.exceptionOrNull()!!
       }
     } else {
       emit(pokemonDao.getAllPokemonList(page).asDomain())
