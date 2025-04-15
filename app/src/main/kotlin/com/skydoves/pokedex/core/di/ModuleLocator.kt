@@ -17,11 +17,7 @@
 package com.skydoves.pokedex.core.di
 
 import android.content.Context
-import com.skydoves.pokedex.core.database.di.DatabaseModule
-import com.skydoves.pokedex.core.network.di.NetworkModule
-import com.skydoves.pokedex.core.repository.RepositoryModule
 import kotlin.getValue
-import kotlinx.coroutines.Dispatchers
 
 object ModuleLocator {
 
@@ -35,10 +31,18 @@ object ModuleLocator {
         context = null
     }
 
-    val networkModule by lazy { NetworkModule() }
+    val serializationModule by lazy { SerializationModule() }
+    val dispatchersModule by lazy { DispatchersModule() }
+    val networkModule by lazy {
+        NetworkModule(
+            json = serializationModule.json,
+            networkCoroutineContext = dispatchersModule.io
+        )
+    }
     val databaseModule by lazy {
         DatabaseModule(
-            context = requireNotNull(context) { "Please attach the context using attach" }
+            context = requireNotNull(context) { "Please attach the context using attach" },
+            json = serializationModule.json
         )
     }
     val repositoryModule by lazy {
@@ -46,7 +50,8 @@ object ModuleLocator {
             networkModule.pokedexClient,
             databaseModule.pokemonDao,
             databaseModule.pokemonInfoDao,
-            Dispatchers.IO,
+            dispatchersModule.io,
+            networkModule.baseUrl
         )
     }
 }

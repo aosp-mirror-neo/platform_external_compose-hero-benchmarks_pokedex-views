@@ -30,35 +30,12 @@
  * limitations under the License.
  */
 
-package com.skydoves.pokedex.core.model
+package com.skydoves.pokedex.core.di
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
-import android.annotation.SuppressLint
-import android.os.Parcel
-import android.os.Parcelable
-import androidx.compose.runtime.Immutable
-import kotlinx.serialization.Serializable
-
-@SuppressLint("BanParcelableUsage") // TODO(b/374318532): Migrate to VersionedParcelable
-@Immutable
-@Serializable
-data class Pokemon(var page: Int = 0, val name: String, val imageUrl: String) : Parcelable {
-
-    constructor(
-        parcel: Parcel
-    ) : this(parcel.readInt(), parcel.readString()!!, parcel.readString()!!)
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(page)
-        parcel.writeString(name)
-        parcel.writeString(imageUrl)
-    }
-
-    override fun describeContents() = 0
-
-    companion object CREATOR : Parcelable.Creator<Pokemon> {
-        override fun createFromParcel(parcel: Parcel) = Pokemon(parcel)
-
-        override fun newArray(size: Int): Array<Pokemon?> = arrayOfNulls(size)
-    }
+class DispatchersModule {
+    val io: CoroutineDispatcher
+        get() = Dispatchers.IO
 }

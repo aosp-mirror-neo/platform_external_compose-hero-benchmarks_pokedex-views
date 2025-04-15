@@ -32,33 +32,23 @@
 
 package com.skydoves.pokedex.core.model
 
-
-import android.annotation.SuppressLint
-import android.os.Parcel
-import android.os.Parcelable
-import androidx.compose.runtime.Immutable
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@SuppressLint("BanParcelableUsage") // TODO(b/374318532): Migrate to VersionedParcelable
-@Immutable
 @Serializable
-data class Pokemon(var page: Int = 0, val name: String, val imageUrl: String) : Parcelable {
+data class PokemonResponse(
+    @SerialName(value = "count") val count: Int,
+    @SerialName(value = "next") val next: String?,
+    @SerialName(value = "previous") val previous: String?,
+    @SerialName(value = "results") val results: List<PokemonNetworkModel>,
+)
 
-    constructor(
-        parcel: Parcel
-    ) : this(parcel.readInt(), parcel.readString()!!, parcel.readString()!!)
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(page)
-        parcel.writeString(name)
-        parcel.writeString(imageUrl)
-    }
-
-    override fun describeContents() = 0
-
-    companion object CREATOR : Parcelable.Creator<Pokemon> {
-        override fun createFromParcel(parcel: Parcel) = Pokemon(parcel)
-
-        override fun newArray(size: Int): Array<Pokemon?> = arrayOfNulls(size)
-    }
-}
+/**
+ * Create a [PokemonResponse] with a list of [pokemons].
+ *
+ * @param pokemons The pokemons to be contained in the response, a list of generated items with fake
+ *   data by default.
+ */
+fun fakePokemonResponse(
+    pokemons: List<PokemonNetworkModel> = fakePokemonNetworkModels(AllPokemonNames)
+) = PokemonResponse(count = pokemons.size, previous = null, next = null, results = pokemons)

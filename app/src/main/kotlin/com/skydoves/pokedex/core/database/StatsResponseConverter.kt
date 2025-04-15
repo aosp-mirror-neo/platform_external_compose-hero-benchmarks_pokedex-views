@@ -30,35 +30,24 @@
  * limitations under the License.
  */
 
-package com.skydoves.pokedex.core.model
+package com.skydoves.pokedex.core.database
 
+import androidx.room.ProvidedTypeConverter
+import androidx.room.TypeConverter
+import com.skydoves.pokedex.core.model.PokemonInfo
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
-import android.annotation.SuppressLint
-import android.os.Parcel
-import android.os.Parcelable
-import androidx.compose.runtime.Immutable
-import kotlinx.serialization.Serializable
+@ProvidedTypeConverter
+class StatsResponseConverter(private val json: Json) {
 
-@SuppressLint("BanParcelableUsage") // TODO(b/374318532): Migrate to VersionedParcelable
-@Immutable
-@Serializable
-data class Pokemon(var page: Int = 0, val name: String, val imageUrl: String) : Parcelable {
-
-    constructor(
-        parcel: Parcel
-    ) : this(parcel.readInt(), parcel.readString()!!, parcel.readString()!!)
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(page)
-        parcel.writeString(name)
-        parcel.writeString(imageUrl)
+    @TypeConverter
+    fun fromString(value: String): List<PokemonInfo.StatsResponse>? {
+        return json.decodeFromString(value)
     }
 
-    override fun describeContents() = 0
-
-    companion object CREATOR : Parcelable.Creator<Pokemon> {
-        override fun createFromParcel(parcel: Parcel) = Pokemon(parcel)
-
-        override fun newArray(size: Int): Array<Pokemon?> = arrayOfNulls(size)
+    @TypeConverter
+    fun fromInfoType(type: List<PokemonInfo.StatsResponse>?): String {
+        return json.encodeToString(type)
     }
 }

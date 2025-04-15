@@ -1,5 +1,5 @@
 /*
- * Designed and developed by 2022 skydoves (Jaewoong Eum)
+ * Designed and developed by 2024 skydoves (Jaewoong Eum)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package com.skydoves.pokedex.core.network.service
+package com.skydoves.pokedex.core.service
 
 import com.skydoves.pokedex.core.model.PokemonInfo
-import com.skydoves.pokedex.core.network.model.PokemonResponse
+import com.skydoves.pokedex.core.model.PokemonResponse
 
 class PokedexClient(private val pokedexService: PokedexService) {
 
-  suspend fun fetchPokemonList(page: Int): Result<PokemonResponse> =
-    pokedexService.fetchPokemonList(
-      limit = PAGING_SIZE,
-      offset = page * PAGING_SIZE,
-    )
+    suspend fun fetchPokemonList(page: Int): Result<PokemonResponse> =
+        kotlin.runCatching {
+            pokedexService.fetchPokemonList(
+                limit = PAGING_SIZE,
+                offset = page * PAGING_SIZE,
+            )
+        }
 
-  suspend fun fetchPokemonInfo(name: String): Result<PokemonInfo> =
-    pokedexService.fetchPokemonInfo(
-      name = name,
-    )
+    suspend fun fetchPokemonInfo(name: String): Result<PokemonInfo> =
+        kotlin.runCatching { pokedexService.fetchPokemonInfo(name = name) }
 
-  companion object {
-    private const val PAGING_SIZE = 20
-  }
+    companion object {
+        private const val PAGING_SIZE = 20
+    }
 }

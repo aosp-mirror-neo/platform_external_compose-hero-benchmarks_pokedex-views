@@ -30,35 +30,17 @@
  * limitations under the License.
  */
 
-package com.skydoves.pokedex.core.model
+package com.skydoves.pokedex.core.repository.details
 
+import com.skydoves.pokedex.core.model.PokemonInfo
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
-import android.annotation.SuppressLint
-import android.os.Parcel
-import android.os.Parcelable
-import androidx.compose.runtime.Immutable
-import kotlinx.serialization.Serializable
+class FakeDetailsRepository : DetailsRepository {
 
-@SuppressLint("BanParcelableUsage") // TODO(b/374318532): Migrate to VersionedParcelable
-@Immutable
-@Serializable
-data class Pokemon(var page: Int = 0, val name: String, val imageUrl: String) : Parcelable {
-
-    constructor(
-        parcel: Parcel
-    ) : this(parcel.readInt(), parcel.readString()!!, parcel.readString()!!)
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(page)
-        parcel.writeString(name)
-        parcel.writeString(imageUrl)
-    }
-
-    override fun describeContents() = 0
-
-    companion object CREATOR : Parcelable.Creator<Pokemon> {
-        override fun createFromParcel(parcel: Parcel) = Pokemon(parcel)
-
-        override fun newArray(size: Int): Array<Pokemon?> = arrayOfNulls(size)
-    }
+    override fun fetchPokemonInfo(
+        name: String,
+        onComplete: () -> Unit,
+        onError: (String?) -> Unit,
+    ): Flow<PokemonInfo> = flowOf()
 }
