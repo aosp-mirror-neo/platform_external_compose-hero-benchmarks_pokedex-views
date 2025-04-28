@@ -14,40 +14,47 @@
  * limitations under the License.
  */
 
-package com.skydoves.pokedex.ui.details
+package com.skydoves.pokedex.ui.main
 
+import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.skydoves.pokedex.core.model.PokemonInfo
-import com.skydoves.pokedex.core.repository.DetailRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.skydoves.pokedex.core.model.Pokemon
+import com.skydoves.pokedex.core.repository.home.HomeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 
-class DetailViewModel(detailRepository: DetailRepository) : ViewModel() {
+internal class PokedexViewsHomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
 
-  private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(true)
+  private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
   val isLoading: StateFlow<Boolean> = _isLoading
 
   private val _toastMessage: MutableStateFlow<String?> = MutableStateFlow(null)
   val toastMessage: StateFlow<String?> = _toastMessage
 
-  val pokemonName: MutableStateFlow<String?> = MutableStateFlow(null)
-
+  private val pokemonFetchingIndex: MutableStateFlow<Int> = MutableStateFlow(0)
   @OptIn(ExperimentalCoroutinesApi::class)
-  val pokemonInfo: StateFlow<PokemonInfo?> =
-    pokemonName
-      .filterNotNull()
-      .flatMapLatest { pokemonName ->
-        detailRepository.fetchPokemonInfo(
-          name = pokemonName,
-          onComplete = { _isLoading.value = false },
-          onError = { _toastMessage.value = it },
-        )
-      }
-      .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+  val pokemonList: StateFlow<List<Pokemon>> = pokemonFetchingIndex
+    .flatMapLatest { page ->
+      homeRepository.fetchPokemonList(
+        page = page,
+        onStart = { _isLoading.value = true },
+        onComplete = { _isLoading.value = false },
+        onError = {
+          _isLoading.value = false
+          _toastMessage.value = it
+        },
+      )
+    }
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  @MainThread
+  fun fetchNextPokemonList() {
+    if (!isLoading.value) {
+      pokemonFetchingIndex.value++
+    }
+  }
 }
