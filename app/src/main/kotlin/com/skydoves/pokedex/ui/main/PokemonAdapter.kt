@@ -16,31 +16,53 @@
 
 package com.skydoves.pokedex.ui.main
 
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.SystemClock
+import android.view.LayoutInflater
 import android.view.ViewGroup
+import com.skydoves.pokedex.core.model.Pokemon
+import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
-import com.skydoves.bindables.BindingListAdapter
-import com.skydoves.bindables.binding
-import com.skydoves.pokedex.R
-import com.skydoves.pokedex.core.model.Pokemon
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.skydoves.pokedex.databinding.ItemPokemonBinding
 import com.skydoves.pokedex.ui.details.DetailActivity
 
-class PokemonAdapter : BindingListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(diffUtil) {
+class PokemonAdapter : ListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(diffUtil) {
 
   private var onClickedAt = 0L
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PokemonViewHolder =
-    parent.binding<ItemPokemonBinding>(R.layout.item_pokemon).let(::PokemonViewHolder)
+  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PokemonViewHolder {
+    val binding = ItemPokemonBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+    return PokemonViewHolder(binding)
+  }
 
   override fun onBindViewHolder(holder: PokemonViewHolder, position: Int) =
-    holder.bindPokemon(getItem(position))
+    holder.bind(getItem(position))
 
-  inner class PokemonViewHolder constructor(
-    private val binding: ItemPokemonBinding,
+  inner class PokemonViewHolder(
+    private val binding: ItemPokemonBinding
   ) : RecyclerView.ViewHolder(binding.root) {
+
+    private val glideRequestListener = PokemonGlideRequestListener(
+      onResourceReady = { drawable ->
+        if (drawable !is BitmapDrawable) return@PokemonGlideRequestListener
+        val bitmap = drawable.bitmap
+        Palette.Builder(bitmap).generate { palette ->
+          val rgb = palette?.dominantSwatch?.rgb
+          if (rgb != null) {
+            binding.cardView.setCardBackgroundColor(rgb)
+          }
+        }
+      }
+    )
 
     init {
       binding.root.setOnClickListener {
@@ -54,9 +76,12 @@ class PokemonAdapter : BindingListAdapter<Pokemon, PokemonAdapter.PokemonViewHol
       }
     }
 
-    fun bindPokemon(pokemon: Pokemon) {
-      binding.pokemon = pokemon
-      binding.executePendingBindings()
+    fun bind(pokemon: Pokemon) {
+      Glide.with(binding.root.context)
+        .load(pokemon.imageUrl)
+        .listener(glideRequestListener)
+        .into(binding.image)
+      binding.name.text = pokemon.name
     }
   }
 
@@ -69,5 +94,32 @@ class PokemonAdapter : BindingListAdapter<Pokemon, PokemonAdapter.PokemonViewHol
       override fun areContentsTheSame(oldItem: Pokemon, newItem: Pokemon): Boolean =
         oldItem == newItem
     }
+  }
+}
+
+internal class PokemonGlideRequestListener(
+  private val onLoadFailed: ((e: GlideException?) -> Unit)? = null,
+  private val onResourceReady: ((resource: Drawable) -> Unit)? = null,
+) : RequestListener<Drawable> {
+  override fun onLoadFailed(
+    e: GlideException?,
+    model: Any?,
+    target: Target<Drawable>,
+    isFirstResource: Boolean,
+  ): Boolean {
+    e?.printStackTrace()
+    onLoadFailed?.invoke(e)
+    return false
+  }
+
+  override fun onResourceReady(
+    resource: Drawable,
+    model: Any,
+    target: Target<Drawable>?,
+    dataSource: DataSource,
+    isFirstResource: Boolean,
+  ): Boolean {
+    onResourceReady?.invoke(resource)
+    return false
   }
 }

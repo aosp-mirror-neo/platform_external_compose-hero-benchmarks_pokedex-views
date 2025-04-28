@@ -14,34 +14,21 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools">
-
-  <data>
-
-    <variable
-      name="pokemon"
-      type="com.skydoves.pokedex.core.model.Pokemon" />
-
-    <variable
-      name="vm"
-      type="com.skydoves.pokedex.ui.details.DetailViewModel" />
-  </data>
-
-  <androidx.core.widget.NestedScrollView
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nestedScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+  <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:layout_marginBottom="32dp"
       android:descendantFocusability="blocksDescendants">
 
-      <androidx.appcompat.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/arrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -51,10 +38,9 @@
         android:translationZ="100dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/header"
-        app:onBackPressed="@{true}"
         app:srcCompat="@drawable/ic_arrow" />
 
-      <androidx.appcompat.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/app_name"
         style="@style/TextStyle"
         android:layout_width="wrap_content"
@@ -66,13 +52,12 @@
         app:layout_constraintStart_toEndOf="@id/arrow"
         app:layout_constraintTop_toTopOf="@id/arrow" />
 
-      <androidx.appcompat.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/index"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
         android:layout_marginStart="12dp"
-        android:text="@{vm.pokemonInfo.idString}"
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -81,13 +66,12 @@
         app:layout_constraintTop_toTopOf="@id/header"
         tools:text="#001" />
 
-      <androidx.appcompat.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:layout_marginBottom="36dp"
-        android:text="@{pokemon.name()}"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
         android:textColor="@color/white"
         android:textSize="36sp"
@@ -98,7 +82,7 @@
         app:layout_constraintTop_toBottomOf="@id/header"
         tools:text="skydoves" />
 
-      <com.google.android.material.imageview.ShapeableImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="260dp"
@@ -108,7 +92,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CardView" />
 
-      <androidx.appcompat.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image"
         android:layout_width="190dp"
         android:layout_height="190dp"
@@ -117,59 +101,52 @@
         android:translationZ="100dp"
         app:layout_constraintBottom_toBottomOf="@id/header"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:paletteImage="@{pokemon.imageUrl}"
-        app:paletteView="@{header}"
-        app:toast="@{vm.toastMessage}" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-      <com.skydoves.androidribbon.RibbonRecyclerView
+    <com.skydoves.androidribbon.RibbonRecyclerView
         android:id="@+id/ribbonRecyclerView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        app:bindPokemonTypes="@{vm.pokemonInfo.types}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/name"
         app:ribbon_recycler_orientation="horizontal" />
 
-      <ProgressBar
+    <ProgressBar
         android:id="@+id/progressbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:gone="@{!vm.loading}"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone" />
 
-      <androidx.appcompat.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/weight"
         style="@style/TextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="@{vm.pokemonInfo.weightString}"
         android:textSize="21sp"
         app:layout_constraintEnd_toStartOf="@id/height"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ribbonRecyclerView"
         tools:text="24.0 KG" />
 
-      <androidx.appcompat.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/height"
         style="@style/TextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@{vm.pokemonInfo.heightString}"
         android:textSize="21sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/weight"
         app:layout_constraintTop_toTopOf="@id/weight"
         tools:text="11 M" />
 
-      <androidx.appcompat.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/weight_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -180,7 +157,7 @@
         app:layout_constraintTop_toBottomOf="@id/weight"
         tools:text="Weight" />
 
-      <androidx.appcompat.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/height_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -190,7 +167,7 @@
         app:layout_constraintStart_toEndOf="@id/weight"
         app:layout_constraintTop_toBottomOf="@id/height" />
 
-      <androidx.appcompat.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/stats_title"
         style="@style/TextStyle"
         android:layout_width="wrap_content"
@@ -203,7 +180,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/weight_title" />
 
-      <TextView
+    <TextView
         android:id="@+id/hp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -215,7 +192,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/stats_title" />
 
-      <com.skydoves.progressview.ProgressView
+    <com.skydoves.progressview.ProgressView
         android:id="@+id/progress_hp"
         android:layout_width="0dp"
         android:layout_height="18dp"
@@ -230,12 +207,9 @@
         app:progressView_labelColorInner="@color/white"
         app:progressView_labelColorOuter="@color/black"
         app:progressView_labelSize="12sp"
-        app:progressView_labelText="@{vm.pokemonInfo.hpString}"
-        app:progressView_max="@{vm.pokemonInfo.MAX_HP}"
-        app:progressView_progress="@{vm.pokemonInfo.hp}"
         app:progressView_radius="12dp" />
 
-      <TextView
+    <TextView
         android:id="@+id/attack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -247,7 +221,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/hp" />
 
-      <com.skydoves.progressview.ProgressView
+    <com.skydoves.progressview.ProgressView
+        android:id="@+id/attackProgress"
         android:layout_width="0dp"
         android:layout_height="18dp"
         android:layout_marginEnd="32dp"
@@ -260,12 +235,9 @@
         app:progressView_labelColorInner="@color/white"
         app:progressView_labelColorOuter="@color/black"
         app:progressView_labelSize="12sp"
-        app:progressView_labelText="@{vm.pokemonInfo.attackString}"
-        app:progressView_max="@{vm.pokemonInfo.MAX_ATTACK}"
-        app:progressView_progress="@{vm.pokemonInfo.attack}"
         app:progressView_radius="12dp" />
 
-      <TextView
+    <TextView
         android:id="@+id/defense"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -277,7 +249,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/attack" />
 
-      <com.skydoves.progressview.ProgressView
+    <com.skydoves.progressview.ProgressView
+        android:id="@+id/defenseProgress"
         android:layout_width="0dp"
         android:layout_height="18dp"
         android:layout_marginEnd="32dp"
@@ -290,12 +263,9 @@
         app:progressView_labelColorInner="@color/white"
         app:progressView_labelColorOuter="@color/black"
         app:progressView_labelSize="12sp"
-        app:progressView_labelText="@{vm.pokemonInfo.defenseString}"
-        app:progressView_max="@{vm.pokemonInfo.MAX_DEFENSE}"
-        app:progressView_progress="@{vm.pokemonInfo.defense}"
         app:progressView_radius="12dp" />
 
-      <TextView
+    <TextView
         android:id="@+id/speed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -307,7 +277,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/defense" />
 
-      <com.skydoves.progressview.ProgressView
+    <com.skydoves.progressview.ProgressView
+        android:id="@+id/speedProgress"
         android:layout_width="0dp"
         android:layout_height="18dp"
         android:layout_marginEnd="32dp"
@@ -320,12 +291,9 @@
         app:progressView_labelColorInner="@color/white"
         app:progressView_labelColorOuter="@color/black"
         app:progressView_labelSize="12sp"
-        app:progressView_labelText="@{vm.pokemonInfo.speedString}"
-        app:progressView_max="@{vm.pokemonInfo.MAX_SPEED}"
-        app:progressView_progress="@{vm.pokemonInfo.speed}"
         app:progressView_radius="12dp" />
 
-      <TextView
+    <TextView
         android:id="@+id/exp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -337,7 +305,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/speed" />
 
-      <com.skydoves.progressview.ProgressView
+    <com.skydoves.progressview.ProgressView
+        android:id="@+id/expProgress"
         android:layout_width="0dp"
         android:layout_height="18dp"
         android:layout_marginEnd="32dp"
@@ -350,13 +319,8 @@
         app:progressView_labelColorInner="@color/white"
         app:progressView_labelColorOuter="@color/black"
         app:progressView_labelSize="12sp"
-        app:progressView_labelText="@{vm.pokemonInfo.expString}"
-        app:progressView_max="@{vm.pokemonInfo.MAX_EXP}"
-        app:progressView_progress="@{vm.pokemonInfo.exp}"
         app:progressView_radius="12dp" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+  </androidx.constraintlayout.widget.ConstraintLayout>
 
-  </androidx.core.widget.NestedScrollView>
-
-</layout>
+</androidx.core.widget.NestedScrollView>
