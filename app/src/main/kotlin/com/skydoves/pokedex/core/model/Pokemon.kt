@@ -32,15 +32,12 @@
 
 package com.skydoves.pokedex.core.model
 
-
 import android.annotation.SuppressLint
 import android.os.Parcel
 import android.os.Parcelable
-import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
 @SuppressLint("BanParcelableUsage") // TODO(b/374318532): Migrate to VersionedParcelable
-@Immutable
 @Serializable
 data class Pokemon(var page: Int = 0, val name: String, val imageUrl: String) : Parcelable {
 

@@ -21,7 +21,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.skydoves.pokedex.core.di.ModuleLocator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -37,71 +36,68 @@ import kotlinx.coroutines.launch
 
 class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
 
-  private lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
-  internal val viewModel: PokedexViewsHomeViewModel by viewModels {
-    PokedexViewsViewModelProviderFactory(ModuleLocator.repositoryModule)
-  }
-
-  private val adapter = PokemonAdapter()
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    ModuleLocator.attach { application }
-    onTransformationStartContainer()
-    super.onCreate(savedInstanceState)
-    binding = ActivityMainBinding.inflate(layoutInflater)
-    setContentView(binding.root)
-
-    setupRecyclerView()
-    observeViewModel()
-  }
-
-  private fun setupRecyclerView() {
-    binding.recyclerView.apply {
-      this.adapter = this@PokedexViewsHomeActivity.adapter
-      layoutManager = GridLayoutManager(this@PokedexViewsHomeActivity, 2)
+    internal val viewModel: PokedexViewsHomeViewModel by viewModels {
+        PokedexViewsViewModelProviderFactory(ModuleLocator.repositoryModule)
     }
-    RecyclerViewPaginator(
-      recyclerView = binding.recyclerView,
-      isLoading = { viewModel.isLoading.value },
-      loadMore = { viewModel.fetchNextPokemonList() },
-      onLast = { false },
-    ).run {
-      threshold = 8
-    }
-  }
 
-  private fun observeViewModel() {
-    lifecycleScope.launch {
-      lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-        launch {
-          viewModel.pokemonList.collect { pokemonList ->
-            adapter.submitList(pokemonList)
-          }
+    private val adapter = PokemonAdapter()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        ModuleLocator.attach { application }
+        onTransformationStartContainer()
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setupRecyclerView()
+        observeViewModel()
+    }
+
+    private fun setupRecyclerView() {
+        binding.recyclerView.apply {
+            this.adapter = this@PokedexViewsHomeActivity.adapter
+            layoutManager = GridLayoutManager(this@PokedexViewsHomeActivity, 2)
         }
-        launch {
-          viewModel.toastMessage
-            .filterNotNull()
-            .collect { message ->
-              println("MainActivity: $message")
-              Toast.makeText(this@PokedexViewsHomeActivity, message, Toast.LENGTH_SHORT).show()
-          }
-        }
-        launch {
-          viewModel.isLoading.collect { isLoading ->
-            binding.progressbar.visibility = if (isLoading) {
-              View.VISIBLE
-            } else {
-              View.GONE
+        RecyclerViewPaginator(
+                recyclerView = binding.recyclerView,
+                isLoading = { viewModel.isLoading.value },
+                loadMore = { viewModel.fetchNextPokemonList() },
+                onLast = { false },
+            )
+            .run { threshold = 8 }
+    }
+
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.pokemonList.collect { pokemonList -> adapter.submitList(pokemonList) }
+                }
+                launch {
+                    viewModel.toastMessage.filterNotNull().collect { message ->
+                        println("MainActivity: $message")
+                        Toast.makeText(this@PokedexViewsHomeActivity, message, Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+                launch {
+                    viewModel.isLoading.collect { isLoading ->
+                        binding.progressbar.visibility =
+                            if (isLoading) {
+                                View.VISIBLE
+                            } else {
+                                View.GONE
+                            }
+                    }
+                }
             }
-          }
         }
-      }
     }
-  }
 
-  override fun onDestroy() {
-    super.onDestroy()
-    ModuleLocator.detach()
-  }
+    override fun onDestroy() {
+        super.onDestroy()
+        ModuleLocator.detach()
+    }
 }

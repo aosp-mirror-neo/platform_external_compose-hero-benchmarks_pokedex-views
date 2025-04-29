@@ -33,10 +33,10 @@
 package com.skydoves.pokedex.core.di
 
 import android.content.Context
-import com.skydoves.pokedex.core.database.PokemonInfoDao
 import androidx.room.Room
 import com.skydoves.pokedex.core.database.PokedexDatabase
 import com.skydoves.pokedex.core.database.PokemonDao
+import com.skydoves.pokedex.core.database.PokemonInfoDao
 import com.skydoves.pokedex.core.database.StatsResponseConverter
 import com.skydoves.pokedex.core.database.TypeResponseConverter
 import kotlin.getValue

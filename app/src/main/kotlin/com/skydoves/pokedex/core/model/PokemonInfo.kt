@@ -36,12 +36,10 @@ import com.skydoves.pokedex.core.model.PokemonInfo.Companion.MAX_ATTACK
 import com.skydoves.pokedex.core.model.PokemonInfo.Companion.MAX_DEFENSE
 import com.skydoves.pokedex.core.model.PokemonInfo.Companion.MAX_HP
 import com.skydoves.pokedex.core.model.PokemonInfo.Companion.MAX_SPEED
-import androidx.compose.runtime.Immutable
 import kotlin.random.Random
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Immutable
 @Serializable
 data class PokemonInfo(
     @SerialName(value = "id") val id: Int,
@@ -114,20 +112,23 @@ data class PokemonInfo(
     }
 }
 
-fun PokemonInfo.StatsResponse.maxOrRandom(): Int = when (stat.name) {
-    "hp" -> MAX_HP
-    "attack" -> MAX_ATTACK
-    "speed" -> MAX_SPEED
-    "defense" -> MAX_DEFENSE
-    else -> Random.nextInt(until = 300)
-}
-fun PokemonInfo.StatsResponse.formatOrNull(): String? = when (stat.name) {
-    "hp" -> " $baseStat/${MAX_HP}"
-    "attack" -> " $baseStat/${MAX_ATTACK}"
-    "speed" -> " $baseStat/${MAX_SPEED}"
-    "defense" -> " $baseStat/${MAX_DEFENSE}"
-    else -> null
-}
+fun PokemonInfo.StatsResponse.maxOrRandom(): Int =
+    when (stat.name) {
+        "hp" -> MAX_HP
+        "attack" -> MAX_ATTACK
+        "speed" -> MAX_SPEED
+        "defense" -> MAX_DEFENSE
+        else -> Random.nextInt(until = 300)
+    }
+
+fun PokemonInfo.StatsResponse.formatOrNull(): String? =
+    when (stat.name) {
+        "hp" -> " $baseStat/${MAX_HP}"
+        "attack" -> " $baseStat/${MAX_ATTACK}"
+        "speed" -> " $baseStat/${MAX_SPEED}"
+        "defense" -> " $baseStat/${MAX_DEFENSE}"
+        else -> null
+    }
 
 fun fakePokemonInfo(id: Int, name: String): PokemonInfo {
     val random = Random(name.hashCode())

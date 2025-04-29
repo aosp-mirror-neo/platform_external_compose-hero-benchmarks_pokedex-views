@@ -16,13 +16,13 @@
 
 package com.skydoves.pokedex.core.di
 
+import com.skydoves.pokedex.core.database.PokemonDao
+import com.skydoves.pokedex.core.database.PokemonInfoDao
 import com.skydoves.pokedex.core.repository.details.DetailsRepository
 import com.skydoves.pokedex.core.repository.details.DetailsRepositoryImpl
 import com.skydoves.pokedex.core.repository.home.HomeRepository
 import com.skydoves.pokedex.core.repository.home.HomeRepositoryImpl
-import com.skydoves.pokedex.core.database.PokemonInfoDao
 import com.skydoves.pokedex.core.service.PokedexClient
-import com.skydoves.pokedex.core.database.PokemonDao
 import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.HttpUrl
 
