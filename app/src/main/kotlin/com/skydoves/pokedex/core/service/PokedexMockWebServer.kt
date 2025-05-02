@@ -69,17 +69,14 @@ private class PokedexMockDispatcher(private val json: Json) : Dispatcher() {
         if (requestUrl == null) return MockResponse().setResponseCode(404)
         val maxPokemon = requestUrl.queryParameter("limit")?.toInt() ?: 20
         val fetchingOffset = requestUrl.queryParameter("offset")?.toInt() ?: 0
-        val response = fakePokemonResponse(
-            pokemons = fakePokemonNetworkModels(
-                pokemonNames = fakePokemonNames(
-                    limit = maxPokemon,
-                    offset = fetchingOffset
-                )
+        val response =
+            fakePokemonResponse(
+                pokemons =
+                    fakePokemonNetworkModels(
+                        pokemonNames = fakePokemonNames(limit = maxPokemon, offset = fetchingOffset)
+                    )
             )
-        )
-        return MockResponse()
-            .setResponseCode(200)
-            .setBody(json.encodeToString(response))
+        return MockResponse().setResponseCode(200).setBody(json.encodeToString(response))
     }
 
     private fun pokemonInfoHandler(request: RecordedRequest): MockResponse {

@@ -32,9 +32,9 @@
 
 package com.skydoves.pokedex.core.database.entitiy
 
-import com.skydoves.pokedex.core.model.PokemonInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.skydoves.pokedex.core.model.PokemonInfo
 
 @Entity
 data class PokemonInfoEntity(

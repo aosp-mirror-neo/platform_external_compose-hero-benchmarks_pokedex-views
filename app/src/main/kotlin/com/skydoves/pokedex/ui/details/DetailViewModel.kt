@@ -19,7 +19,7 @@ package com.skydoves.pokedex.ui.details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.skydoves.pokedex.core.model.PokemonInfo
-import com.skydoves.pokedex.core.repository.DetailRepository
+import com.skydoves.pokedex.core.repository.details.DetailsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,26 +28,26 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 
-class DetailViewModel(detailRepository: DetailRepository) : ViewModel() {
+class DetailViewModel(detailRepository: DetailsRepository) : ViewModel() {
 
-  private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(true)
-  val isLoading: StateFlow<Boolean> = _isLoading
+    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-  private val _toastMessage: MutableStateFlow<String?> = MutableStateFlow(null)
-  val toastMessage: StateFlow<String?> = _toastMessage
+    private val _toastMessage: MutableStateFlow<String?> = MutableStateFlow(null)
+    val toastMessage: StateFlow<String?> = _toastMessage
 
-  val pokemonName: MutableStateFlow<String?> = MutableStateFlow(null)
+    val pokemonName: MutableStateFlow<String?> = MutableStateFlow(null)
 
-  @OptIn(ExperimentalCoroutinesApi::class)
-  val pokemonInfo: StateFlow<PokemonInfo?> =
-    pokemonName
-      .filterNotNull()
-      .flatMapLatest { pokemonName ->
-        detailRepository.fetchPokemonInfo(
-          name = pokemonName,
-          onComplete = { _isLoading.value = false },
-          onError = { _toastMessage.value = it },
-        )
-      }
-      .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val pokemonInfo: StateFlow<PokemonInfo?> =
+        pokemonName
+            .filterNotNull()
+            .flatMapLatest { pokemonName ->
+                detailRepository.fetchPokemonInfo(
+                    name = pokemonName,
+                    onComplete = { _isLoading.value = false },
+                    onError = { _toastMessage.value = it },
+                )
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 }

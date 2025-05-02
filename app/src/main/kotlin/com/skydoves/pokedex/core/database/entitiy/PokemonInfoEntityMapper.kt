@@ -34,24 +34,26 @@ package com.skydoves.pokedex.core.database.entitiy
 
 import com.skydoves.pokedex.core.model.PokemonInfo
 
-fun PokemonInfo.asDatabaseEntity(): PokemonInfoEntity = PokemonInfoEntity(
-    id = id,
-    name = name,
-    height = height,
-    weight = weight,
-    experience = experience,
-    types = types,
-    exp = exp,
-    stats = stats,
-)
+fun PokemonInfo.asDatabaseEntity(): PokemonInfoEntity =
+    PokemonInfoEntity(
+        id = id,
+        name = name,
+        height = height,
+        weight = weight,
+        experience = experience,
+        types = types,
+        exp = exp,
+        stats = stats,
+    )
 
-fun PokemonInfoEntity.asPresentationModel(): PokemonInfo = PokemonInfo(
-    id = id,
-    name = name,
-    height = height,
-    weight = weight,
-    experience = experience,
-    types = types,
-    exp = exp,
-    stats = stats,
-)
+fun PokemonInfoEntity.asPresentationModel(): PokemonInfo =
+    PokemonInfo(
+        id = id,
+        name = name,
+        height = height,
+        weight = weight,
+        experience = experience,
+        types = types,
+        exp = exp,
+        stats = stats,
+    )

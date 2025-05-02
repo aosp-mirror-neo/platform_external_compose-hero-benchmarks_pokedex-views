@@ -16,21 +16,16 @@
 
 package com.skydoves.pokedex.core
 
-import com.skydoves.pokedex.core.di.RepositoryModule
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.skydoves.pokedex.core.repository.RepositoryModule
+import com.skydoves.pokedex.core.di.RepositoryModule
 import com.skydoves.pokedex.ui.details.DetailViewModel
 import com.skydoves.pokedex.ui.main.PokedexViewsHomeViewModel
 
 fun PokedexViewsViewModelProviderFactory(
     repositoryModule: RepositoryModule
 ): ViewModelProvider.Factory = viewModelFactory {
-    initializer {
-        PokedexViewsHomeViewModel(repositoryModule.homeRepository)
-    }
-    initializer {
-        DetailViewModel(repositoryModule.detailsRepository)
-    }
+    initializer { PokedexViewsHomeViewModel(repositoryModule.homeRepository) }
+    initializer { DetailViewModel(repositoryModule.detailsRepository) }
 }
