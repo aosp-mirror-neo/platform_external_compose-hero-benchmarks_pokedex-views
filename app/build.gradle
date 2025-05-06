@@ -90,7 +90,6 @@ dependencies {
     implementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     implementation("com.squareup.okhttp3:okhttp-tls:4.12.0")
 
-    // We don't run tests in this module, but it needs to be included when AndroidX tries to run
-    //  tests.
-    implementation(libs.testRunner)
+    // TODO: Remove after investigating why we run tests against pokedex. b/416000929
+    androidTestImplementation(libs.testRunner)
 }
