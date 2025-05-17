@@ -31,7 +31,7 @@ class RepositoryModule(
     private val pokemonDao: PokemonDao,
     private val pokemonInfoDao: PokemonInfoDao,
     private val ioDispatcher: CoroutineDispatcher,
-    private val apiUrl: HttpUrl
+    private val apiUrl: HttpUrl,
 ) {
     val detailsRepository: DetailsRepository by lazy {
         DetailsRepositoryImpl(pokedexClient, pokemonInfoDao, ioDispatcher)
