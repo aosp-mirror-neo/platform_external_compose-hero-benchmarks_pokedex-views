@@ -52,6 +52,6 @@ fun List<PokemonEntity>.asPresentationModel(apiUrl: HttpUrl, page: Int = 0): Lis
                     .addPathSegment("image")
                     .build()
                     .toString(),
-            page = page
+            page = page,
         )
     }

@@ -49,7 +49,7 @@ class HomeRepositoryImpl(
     private val pokedexClient: PokedexClient,
     private val pokemonDao: PokemonDao,
     private val ioDispatcher: CoroutineDispatcher,
-    private val apiUrl: HttpUrl
+    private val apiUrl: HttpUrl,
 ) : HomeRepository {
 
     @WorkerThread
