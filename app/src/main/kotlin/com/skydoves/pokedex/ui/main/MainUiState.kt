@@ -21,5 +21,5 @@ import com.skydoves.pokedex.core.model.Pokemon
 internal data class MainUiState(
     val loading: Boolean,
     val toastMessage: String?,
-    val pokemon: List<Pokemon>
+    val pokemon: List<Pokemon>,
 )

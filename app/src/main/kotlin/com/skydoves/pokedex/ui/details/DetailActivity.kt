@@ -89,7 +89,7 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
             onImageReady = { drawable ->
                 if (drawable !is BitmapDrawable) return@bindPokemonImage
                 lifecycleScope.launch { binding.header.bindPalette(drawable.bitmap) }
-            }
+            },
         )
     }
 
@@ -133,27 +133,27 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
         progressHp.bind(
             labelText = pokemonInfo.getHpString(),
             max = PokemonInfo.MAX_HP.toFloat(),
-            progress = pokemonInfo.hp.toFloat()
+            progress = pokemonInfo.hp.toFloat(),
         )
         attackProgress.bind(
             labelText = pokemonInfo.getAttackString(),
             max = PokemonInfo.MAX_ATTACK.toFloat(),
-            progress = pokemonInfo.attack.toFloat()
+            progress = pokemonInfo.attack.toFloat(),
         )
         defenseProgress.bind(
             labelText = pokemonInfo.getDefenseString(),
             max = PokemonInfo.MAX_DEFENSE.toFloat(),
-            progress = pokemonInfo.defense.toFloat()
+            progress = pokemonInfo.defense.toFloat(),
         )
         speedProgress.bind(
             labelText = pokemonInfo.getSpeedString(),
             max = PokemonInfo.MAX_SPEED.toFloat(),
-            progress = pokemonInfo.speed.toFloat()
+            progress = pokemonInfo.speed.toFloat(),
         )
         expProgress.bind(
             labelText = pokemonInfo.getExpString(),
             max = PokemonInfo.MAX_EXP.toFloat(),
-            progress = pokemonInfo.exp.toFloat()
+            progress = pokemonInfo.exp.toFloat(),
         )
     }
 
@@ -189,13 +189,13 @@ private fun RibbonRecyclerView.bindPokemonTypes(types: List<PokemonInfo.TypeResp
                         setRibbonRadius(120f)
                         setTextStyle(Typeface.BOLD)
                         setRibbonBackgroundColorResource(
-                            PokemonTypeUtils.getTypeColor(type.type.name),
+                            PokemonTypeUtils.getTypeColor(type.type.name)
                         )
                     }
                     .apply {
                         maxLines = 1
                         gravity = Gravity.CENTER
-                    },
+                    }
             )
             addItemDecoration(SpacesItemDecoration())
         }
@@ -204,7 +204,7 @@ private fun RibbonRecyclerView.bindPokemonTypes(types: List<PokemonInfo.TypeResp
 
 private fun ActivityDetailBinding.bindPokemonImage(
     url: String,
-    onImageReady: (Drawable) -> Unit = {}
+    onImageReady: (Drawable) -> Unit = {},
 ) {
     Glide.with(root.context)
         .load(url)
@@ -216,7 +216,7 @@ private fun ActivityDetailBinding.bindPokemonImage(
 
 private suspend fun ShapeableImageView.bindPalette(
     bitmap: Bitmap,
-    onBackgroundColorReady: (Int) -> Unit = {}
+    onBackgroundColorReady: (Int) -> Unit = {},
 ) {
     val palette = withContext(Dispatchers.IO) { Palette.Builder(bitmap).generate() }
     val light = palette.lightVibrantSwatch?.rgb
