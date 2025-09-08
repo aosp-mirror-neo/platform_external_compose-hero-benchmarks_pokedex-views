@@ -59,6 +59,7 @@ import com.skydoves.transformationlayout.TransformationLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl
 
 class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
 
@@ -68,11 +69,25 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
         PokedexViewsViewModelProviderFactory(ModuleLocator.repositoryModule)
     }
 
-    private val pokemon: Pokemon by bundleNonNull(EXTRA_POKEMON)
+    private lateinit var _pokemon: Lazy<Pokemon>
+    private val pokemon
+        get() = _pokemon.value
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (PokedexFeatureFlags.EnableSharedElementTransitions) {
-            onTransformationEndContainerApplyParams(this)
+        val startDestination = intent.getStringExtra("startDestination")
+        if (startDestination == "details") {
+            _pokemon = lazy {
+                Pokemon(
+                    page = 0,
+                    name = "Bulbasaur",
+                    imageUrl = getPokemonImageUrlByName("Bulbasaur").toString(),
+                )
+            }
+        } else {
+            _pokemon = bundleNonNull<Pokemon>(EXTRA_POKEMON)
+            if (PokedexFeatureFlags.EnableSharedElementTransitions) {
+                onTransformationEndContainerApplyParams(this)
+            }
         }
         super.onCreate(savedInstanceState)
         trace("ModuleLocator#attach") { ModuleLocator.attach { application } }
@@ -275,4 +290,14 @@ private suspend fun ShapeableImageView.bindPalette(
         }
         onBackgroundColorReady(dominantColor)
     }
+}
+
+private fun getPokemonImageUrlByName(name: String, apiUrl: HttpUrl? = null): HttpUrl {
+    val baseApiUrl = apiUrl ?: ModuleLocator.networkModule.baseUrl
+    return baseApiUrl
+        .newBuilder()
+        .addPathSegment("pokemon")
+        .addPathSegment(name)
+        .addPathSegment("image")
+        .build()
 }
