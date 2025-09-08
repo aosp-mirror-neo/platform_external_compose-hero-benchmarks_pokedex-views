@@ -37,17 +37,8 @@
 
   </com.google.android.material.appbar.AppBarLayout>
 
-  <TextView
-      android:id="@+id/pokedex_home_transition_status"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/appBarLayout"
-      android:text="pokedex-home-transition-active-false" />
-
   <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/PokedexList"
+      android:id="@+id/recyclerView"
       android:layout_width="match_parent"
       android:layout_height="0dp"
       android:clipToPadding="false"
@@ -61,7 +52,7 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@id/appBarLayout"
       app:spanCount="2"
-      tools:listitem="@layout/item_pokemon_transformation_layout" />
+      tools:listitem="@layout/item_pokemon" />
 
   <ProgressBar
       android:id="@+id/progressbar"

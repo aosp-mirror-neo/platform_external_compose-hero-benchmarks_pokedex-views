@@ -16,7 +16,6 @@
 
 package com.skydoves.pokedex.ui.details
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Typeface
@@ -32,7 +31,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.palette.graphics.Palette
-import androidx.tracing.trace
 import com.bumptech.glide.Glide
 import com.google.android.material.imageview.ShapeableImageView
 import com.skydoves.androidribbon.RibbonRecyclerView
@@ -40,7 +38,6 @@ import com.skydoves.androidribbon.ribbonView
 import com.skydoves.bundler.bundleNonNull
 import com.skydoves.bundler.intentOf
 import com.skydoves.pokedex.R
-import com.skydoves.pokedex.core.PokedexFeatureFlags
 import com.skydoves.pokedex.core.PokedexViewsViewModelProviderFactory
 import com.skydoves.pokedex.core.di.ModuleLocator
 import com.skydoves.pokedex.core.model.Pokemon
@@ -59,7 +56,6 @@ import com.skydoves.transformationlayout.TransformationLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl
 
 class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
 
@@ -69,31 +65,12 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
         PokedexViewsViewModelProviderFactory(ModuleLocator.repositoryModule)
     }
 
-    private lateinit var _pokemon: Lazy<Pokemon>
-    private val pokemon
-        get() = _pokemon.value
+    private val pokemon: Pokemon by bundleNonNull(EXTRA_POKEMON)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val startDestination = intent.getStringExtra("startDestination")
-        if (startDestination == "details") {
-            _pokemon = lazy {
-                Pokemon(
-                    page = 0,
-                    name = "Bulbasaur",
-                    imageUrl = getPokemonImageUrlByName("Bulbasaur").toString(),
-                )
-            }
-        } else {
-            _pokemon = bundleNonNull<Pokemon>(EXTRA_POKEMON)
-            if (PokedexFeatureFlags.EnableSharedElementTransitions) {
-                onTransformationEndContainerApplyParams(this)
-            }
-        }
+        ModuleLocator.attach { application }
+        onTransformationEndContainerApplyParams(this)
         super.onCreate(savedInstanceState)
-        trace("ModuleLocator#attach") { ModuleLocator.attach { application } }
-        if (PokedexFeatureFlags.EnableSharedElementTransitions) {
-            setupSharedElementTransitionListeners()
-        }
         binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -105,7 +82,7 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
     }
 
     private fun bindViews() {
-        binding.pokedexDetailsBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        binding.arrow.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         binding.name.text = pokemon.name
         binding.bindPokemonImage(
             url = pokemon.imageUrl,
@@ -114,27 +91,6 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
                 lifecycleScope.launch { binding.header.bindPalette(drawable.bitmap) }
             },
         )
-    }
-
-    private fun setupSharedElementTransitionListeners() {
-        val sharedElementTransitionListener =
-            object : android.transition.Transition.TransitionListener {
-                override fun onTransitionStart(transition: android.transition.Transition?) {
-                    binding.transitionStatus.text = "pokedex-details-transition-active-true"
-                }
-
-                override fun onTransitionEnd(transition: android.transition.Transition?) {
-                    binding.transitionStatus.text = "pokedex-details-transition-active-false"
-                }
-
-                override fun onTransitionCancel(transition: android.transition.Transition?) {}
-
-                override fun onTransitionPause(transition: android.transition.Transition?) {}
-
-                override fun onTransitionResume(transition: android.transition.Transition?) {}
-            }
-        window.sharedElementEnterTransition.addListener(sharedElementTransitionListener)
-        window.sharedElementReturnTransition.addListener(sharedElementTransitionListener)
     }
 
     private fun observeViewModel() {
@@ -209,17 +165,7 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
     companion object {
         internal const val EXTRA_POKEMON = "EXTRA_POKEMON"
 
-        fun startActivity(context: Context, pokemon: Pokemon) {
-            context.intentOf<DetailActivity> {
-                putExtra(EXTRA_POKEMON to pokemon)
-                startActivity(context)
-            }
-        }
-
-        fun startActivityWithTransition(
-            transformationLayout: TransformationLayout,
-            pokemon: Pokemon,
-        ) =
+        fun startActivity(transformationLayout: TransformationLayout, pokemon: Pokemon) =
             transformationLayout.context.intentOf<DetailActivity> {
                 putExtra(EXTRA_POKEMON to pokemon)
                 TransformationCompat.startActivity(transformationLayout, intent)
@@ -290,14 +236,4 @@ private suspend fun ShapeableImageView.bindPalette(
         }
         onBackgroundColorReady(dominantColor)
     }
-}
-
-private fun getPokemonImageUrlByName(name: String, apiUrl: HttpUrl? = null): HttpUrl {
-    val baseApiUrl = apiUrl ?: ModuleLocator.networkModule.baseUrl
-    return baseApiUrl
-        .newBuilder()
-        .addPathSegment("pokemon")
-        .addPathSegment(name)
-        .addPathSegment("image")
-        .build()
 }
