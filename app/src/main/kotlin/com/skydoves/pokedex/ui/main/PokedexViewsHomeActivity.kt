@@ -174,7 +174,7 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
                 loadMore = { viewModel.fetchNextPokemonList() },
                 onLast = { false },
             )
-            .run { threshold = 8 }
+            .run { threshold = 48 }
     }
 
     private fun observeViewModel() {
