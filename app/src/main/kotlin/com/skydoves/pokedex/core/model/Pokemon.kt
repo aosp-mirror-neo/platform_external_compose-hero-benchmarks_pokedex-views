@@ -33,8 +33,11 @@
 package com.skydoves.pokedex.core.model
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
+import com.skydoves.pokedex.core.PokedexFeatureFlags
+import com.skydoves.pokedex.core.database.entitiy.getPokemonImageFileByName
 import kotlinx.serialization.Serializable
 
 @SuppressLint("BanParcelableUsage") // TODO(b/374318532): Migrate to VersionedParcelable
@@ -59,3 +62,9 @@ data class Pokemon(var page: Int = 0, val name: String, val imageUrl: String) : 
         override fun newArray(size: Int): Array<Pokemon?> = arrayOfNulls(size)
     }
 }
+
+fun Pokemon.imageAsGlideModel(context: Context) =
+    when (PokedexFeatureFlags.FetchPokemonImagesFromDisk) {
+        true -> getPokemonImageFileByName(name = name, filesDir = context.filesDir.absolutePath)
+        false -> imageUrl
+    }

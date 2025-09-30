@@ -32,8 +32,10 @@
 
 package com.skydoves.pokedex.core.database.entitiy
 
+import com.skydoves.pokedex.core.di.ModuleLocator
 import com.skydoves.pokedex.core.model.Pokemon
 import com.skydoves.pokedex.core.model.PokemonNetworkModel
+import java.io.File
 import okhttp3.HttpUrl
 
 fun List<PokemonNetworkModel>.asDatabaseEntity(): List<PokemonEntity> = map { pokemon ->
@@ -44,14 +46,19 @@ fun List<PokemonEntity>.asPresentationModel(apiUrl: HttpUrl, page: Int = 0): Lis
     map { entity ->
         Pokemon(
             name = entity.name.replaceFirstChar { it.uppercase() },
-            imageUrl =
-                apiUrl
-                    .newBuilder()
-                    .addPathSegment("pokemon")
-                    .addPathSegment(entity.name)
-                    .addPathSegment("image")
-                    .build()
-                    .toString(),
+            imageUrl = getPokemonImageUrlByName(name = entity.name, apiUrl = apiUrl).toString(),
             page = page,
         )
     }
+
+fun getPokemonImageUrlByName(name: String, apiUrl: HttpUrl? = null): HttpUrl {
+    val baseApiUrl = apiUrl ?: ModuleLocator.networkModule.baseUrl
+    return baseApiUrl
+        .newBuilder()
+        .addPathSegment("pokemon")
+        .addPathSegment(name)
+        .addPathSegment("image")
+        .build()
+}
+
+fun getPokemonImageFileByName(name: String, filesDir: String): File = File(filesDir, "${name}.png")
