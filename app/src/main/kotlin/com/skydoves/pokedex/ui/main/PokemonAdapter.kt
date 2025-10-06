@@ -33,6 +33,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.skydoves.pokedex.R
 import com.skydoves.pokedex.core.PokedexFeatureFlags
 import com.skydoves.pokedex.core.model.Pokemon
 import com.skydoves.pokedex.core.model.imageAsGlideModel
@@ -44,7 +45,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import com.skydoves.pokedex.R
 
 class PokemonAdapter(private val onItemClicked: (Pokemon, TransformationLayout?) -> Unit) :
     ListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(diffUtil) {
