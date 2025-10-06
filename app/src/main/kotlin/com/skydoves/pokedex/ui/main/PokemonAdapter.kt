@@ -44,6 +44,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import com.skydoves.pokedex.R
 
 class PokemonAdapter(private val onItemClicked: (Pokemon, TransformationLayout?) -> Unit) :
     ListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(diffUtil) {
@@ -135,6 +136,7 @@ class PokemonAdapter(private val onItemClicked: (Pokemon, TransformationLayout?)
         fun bind(pokemon: Pokemon) {
             Glide.with(binding.root.context)
                 .load(pokemon.imageAsGlideModel(binding.root.context))
+                .placeholder(R.drawable.pokemon_preview)
                 .listener(glideRequestListener)
                 .into(binding.image)
             binding.name.text = pokemon.name
