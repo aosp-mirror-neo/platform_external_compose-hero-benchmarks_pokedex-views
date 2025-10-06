@@ -30,6 +30,9 @@ class PokedexClient(private val pokedexService: PokedexService) {
         kotlin.runCatching { pokedexService.fetchPokemonInfo(name = name) }
 
     companion object {
-        private const val PAGING_SIZE = 48
+        // NOTE: Keep this aligned with Pokedex-Compose's PAGING_SIZE.
+        // The paging size is a bit higher as we perform fast flings in our benchmarks, and thus
+        // want more content to be ready.
+        private const val PAGING_SIZE = 64
     }
 }
