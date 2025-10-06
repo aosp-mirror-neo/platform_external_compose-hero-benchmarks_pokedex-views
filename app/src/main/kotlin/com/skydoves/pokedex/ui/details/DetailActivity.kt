@@ -111,7 +111,6 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
             if (startDestination == "details") {
                 lazy {
                     Pokemon(
-                        page = 0,
                         name = "Bulbasaur",
                         imageUrl = getPokemonImageUrlByName("Bulbasaur").toString(),
                     )

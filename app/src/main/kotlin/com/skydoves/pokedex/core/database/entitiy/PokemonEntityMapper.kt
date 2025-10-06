@@ -42,14 +42,12 @@ fun List<PokemonNetworkModel>.asDatabaseEntity(): List<PokemonEntity> = map { po
     PokemonEntity(name = pokemon.name)
 }
 
-fun List<PokemonEntity>.asPresentationModel(apiUrl: HttpUrl, page: Int = 0): List<Pokemon> =
-    map { entity ->
-        Pokemon(
-            name = entity.name.replaceFirstChar { it.uppercase() },
-            imageUrl = getPokemonImageUrlByName(name = entity.name, apiUrl = apiUrl).toString(),
-            page = page,
-        )
-    }
+fun List<PokemonEntity>.asPresentationModel(apiUrl: HttpUrl): List<Pokemon> = map { entity ->
+    Pokemon(
+        name = entity.name.replaceFirstChar { it.uppercase() },
+        imageUrl = getPokemonImageUrlByName(name = entity.name, apiUrl = apiUrl).toString(),
+    )
+}
 
 fun getPokemonImageUrlByName(name: String, apiUrl: HttpUrl? = null): HttpUrl {
     val baseApiUrl = apiUrl ?: ModuleLocator.networkModule.baseUrl
