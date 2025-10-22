@@ -174,7 +174,10 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
                 loadMore = { viewModel.fetchNextPokemonList() },
                 onLast = { false },
             )
-            .run { threshold = 48 }
+            // threshold is more like an anti-threshold. The higher it is, the earlier we will
+            // fetch more data, even if it's not actually needed. The threshold should ideally be
+            // aligned with how many items can be visible on screen at once.
+            .run { threshold = 8 }
     }
 
     private fun observeViewModel() {
