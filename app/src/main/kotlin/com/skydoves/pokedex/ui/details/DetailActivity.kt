@@ -47,9 +47,11 @@ import com.skydoves.pokedex.core.PokedexFeatureFlags
 import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_ENABLE_SHARED_ELEMENT_TRANSITIONS
 import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_ENABLE_TRANSFORMATION_LAYOUT
 import com.skydoves.pokedex.core.PokedexViewsViewModelProviderFactory
+import com.skydoves.pokedex.core.database.entitiy.getPokemonImageUrlByName
 import com.skydoves.pokedex.core.di.ModuleLocator
 import com.skydoves.pokedex.core.model.Pokemon
 import com.skydoves.pokedex.core.model.PokemonInfo
+import com.skydoves.pokedex.core.model.imageAsGlideModel
 import com.skydoves.pokedex.databinding.ActivityDetailBinding
 import com.skydoves.pokedex.ui.main.PokemonGlideRequestListener
 import com.skydoves.pokedex.utils.PokemonTypeUtils
@@ -65,7 +67,6 @@ import com.skydoves.transformationlayout.TransformationLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl
 
 class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
 
@@ -110,7 +111,6 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
             if (startDestination == "details") {
                 lazy {
                     Pokemon(
-                        page = 0,
                         name = "Bulbasaur",
                         imageUrl = getPokemonImageUrlByName("Bulbasaur").toString(),
                     )
@@ -141,7 +141,7 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
         binding.pokedexDetailsBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         binding.name.text = pokemon.name
         binding.bindPokemonImage(
-            url = pokemon.imageUrl,
+            model = pokemon.imageAsGlideModel(binding.root.context),
             onImageReady = { drawable ->
                 if (drawable !is BitmapDrawable) return@bindPokemonImage
                 lifecycleScope.launch { binding.header.bindPalette(drawable.bitmap) }
@@ -319,11 +319,11 @@ private fun RibbonRecyclerView.bindPokemonTypes(types: List<PokemonInfo.TypeResp
 }
 
 private fun ActivityDetailBinding.bindPokemonImage(
-    url: String,
+    model: Any,
     onImageReady: (Drawable) -> Unit = {},
 ) {
     Glide.with(root.context)
-        .load(url)
+        .load(model)
         .listener(
             PokemonGlideRequestListener(onResourceReady = { resource -> onImageReady(resource) })
         )
@@ -352,14 +352,4 @@ private suspend fun ShapeableImageView.bindPalette(
         }
         onBackgroundColorReady(dominantColor)
     }
-}
-
-private fun getPokemonImageUrlByName(name: String, apiUrl: HttpUrl? = null): HttpUrl {
-    val baseApiUrl = apiUrl ?: ModuleLocator.networkModule.baseUrl
-    return baseApiUrl
-        .newBuilder()
-        .addPathSegment("pokemon")
-        .addPathSegment(name)
-        .addPathSegment("image")
-        .build()
 }
