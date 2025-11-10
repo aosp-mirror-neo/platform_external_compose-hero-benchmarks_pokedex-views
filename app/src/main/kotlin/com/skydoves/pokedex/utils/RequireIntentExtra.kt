@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package com.skydoves.pokedex.ui.main
+package com.skydoves.pokedex.utils
 
-import com.skydoves.pokedex.core.model.Pokemon
+import android.content.Intent
 
-internal data class MainUiState(
-    val loading: Boolean,
-    val toastMessage: String?,
-    val pokemon: List<Pokemon>,
-)
+internal fun Intent.requireBooleanExtra(
+    name: String,
+    lazyMessage: () -> String = { "Did not find extra $name in intent." },
+): Boolean {
+    val hasExtra = hasExtra(name)
+    if (!hasExtra) {
+        throw IllegalArgumentException(lazyMessage())
+    }
+    return getBooleanExtra(name, false)
+}

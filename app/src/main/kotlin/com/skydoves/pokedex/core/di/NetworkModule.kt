@@ -87,7 +87,7 @@ class NetworkModule(private val json: Json, private val networkCoroutineContext:
             )
             .sslSocketFactory(
                 sslSocketFactory = localhostCertificates.sslSocketFactory(),
-                trustManager = localhostCertificates.trustManager
+                trustManager = localhostCertificates.trustManager,
             )
             .build()
     }
