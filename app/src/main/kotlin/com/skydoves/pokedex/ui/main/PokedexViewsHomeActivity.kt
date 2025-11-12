@@ -21,8 +21,12 @@ import android.transition.Transition
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -64,6 +68,7 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
     private var transitionTraceCookie = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         trace("PokedexActivity Setup") {
             PokedexFeatureFlags.EnableTransformationLayout =
                 intent.requireBooleanExtra(POKEDEX_ENABLE_TRANSFORMATION_LAYOUT)
@@ -105,6 +110,13 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
         adapter = PokemonAdapter(onItemClicked = onItemClicked)
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(activityMainBinding.root) { _, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            activityMainBinding.appBarLayout.updatePadding(top = insets.top)
+            activityMainBinding.PokedexList.updatePadding(bottom = insets.bottom)
+            WindowInsetsCompat.toWindowInsetsCompat(windowInsets.toWindowInsets()!!)
+        }
 
         setupRecyclerView()
         observeViewModel()
