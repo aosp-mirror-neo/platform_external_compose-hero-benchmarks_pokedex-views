@@ -26,7 +26,10 @@ fun fakePokemonNetworkModels(pokemonNames: List<String>) =
 
 fun fakePokemonNames(limit: Int, offset: Int = 0): List<String> =
     trace("fakePokemonNames(limit=$limit, offset=$offset)") {
-        return AllPokemonNames.subList(offset, minOf(offset + limit, AllPokemonNames.size))
+        val numberOfPokemon = AllPokemonNames.size
+        val from = offset.coerceIn(0, numberOfPokemon)
+        val max = (offset + limit).coerceAtMost(numberOfPokemon)
+        return AllPokemonNames.subList(from, max)
     }
 
 val AllPokemonNames =
@@ -338,6 +341,6 @@ val AllPokemonNames =
             "Xenonix",
             "Zephyron",
             "Ziggurat",
-            "Zincite"
+            "Zincite",
         )
     }
