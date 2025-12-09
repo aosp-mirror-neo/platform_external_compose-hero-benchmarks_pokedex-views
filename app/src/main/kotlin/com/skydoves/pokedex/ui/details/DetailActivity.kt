@@ -16,12 +16,15 @@
 
 package com.skydoves.pokedex.ui.details
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.transition.Transition
+import android.util.Log
 import android.view.Gravity
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -31,6 +34,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.palette.graphics.Palette
+import androidx.tracing.Trace
+import androidx.tracing.trace
 import com.bumptech.glide.Glide
 import com.google.android.material.imageview.ShapeableImageView
 import com.skydoves.androidribbon.RibbonRecyclerView
@@ -38,14 +43,20 @@ import com.skydoves.androidribbon.ribbonView
 import com.skydoves.bundler.bundleNonNull
 import com.skydoves.bundler.intentOf
 import com.skydoves.pokedex.R
+import com.skydoves.pokedex.core.PokedexFeatureFlags
+import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_ENABLE_SHARED_ELEMENT_TRANSITIONS
+import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_ENABLE_TRANSFORMATION_LAYOUT
 import com.skydoves.pokedex.core.PokedexViewsViewModelProviderFactory
+import com.skydoves.pokedex.core.database.entitiy.getPokemonImageUrlByName
 import com.skydoves.pokedex.core.di.ModuleLocator
 import com.skydoves.pokedex.core.model.Pokemon
 import com.skydoves.pokedex.core.model.PokemonInfo
+import com.skydoves.pokedex.core.model.imageAsGlideModel
 import com.skydoves.pokedex.databinding.ActivityDetailBinding
 import com.skydoves.pokedex.ui.main.PokemonGlideRequestListener
 import com.skydoves.pokedex.utils.PokemonTypeUtils
 import com.skydoves.pokedex.utils.SpacesItemDecoration
+import com.skydoves.pokedex.utils.requireBooleanExtra
 import com.skydoves.progressview.ProgressView
 import com.skydoves.rainbow.Rainbow
 import com.skydoves.rainbow.RainbowOrientation
@@ -65,12 +76,26 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
         PokedexViewsViewModelProviderFactory(ModuleLocator.repositoryModule)
     }
 
-    private val pokemon: Pokemon by bundleNonNull(EXTRA_POKEMON)
+    private lateinit var _pokemon: Lazy<Pokemon>
+    private val pokemon
+        get() = _pokemon.value
+
+    /**
+     * Cookie for the trace block of the home <-> details transition. Should be set when starting a
+     * transition and reset when it ends.
+     */
+    private var transitionTraceCookie: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ModuleLocator.attach { application }
-        onTransformationEndContainerApplyParams(this)
+        trace("DetailActivity Setup") {
+            val startDestination = intent.getStringExtra("startDestination")
+            setupSharedElementTransition(startDestination)
+            transitionTraceCookie = intent.getIntExtra(TRACE_COOKIE, -1)
+            setupPokemonData(startDestination)
+        }
+
         super.onCreate(savedInstanceState)
+        trace("ModuleLocator#attach") { ModuleLocator.attach { application } }
         binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -81,16 +106,90 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
         viewModel.pokemonName.value = pokemon.name
     }
 
+    private fun setupPokemonData(startDestination: String?) {
+        _pokemon =
+            if (startDestination == "details") {
+                lazy {
+                    Pokemon(
+                        name = "Bulbasaur",
+                        imageUrl = getPokemonImageUrlByName("Bulbasaur").toString(),
+                    )
+                }
+            } else {
+                bundleNonNull<Pokemon>(EXTRA_POKEMON)
+            }
+    }
+
+    private fun setupSharedElementTransition(startDestination: String?) {
+        // For startup benchmarks, our start destination will be details. In that case, we won't
+        //  have initialized the feature flags yet. If our start destination is something else,
+        //  assume we have already initialized the flags.
+        if (startDestination == "details") {
+            PokedexFeatureFlags.EnableTransformationLayout =
+                intent.requireBooleanExtra(POKEDEX_ENABLE_TRANSFORMATION_LAYOUT)
+            PokedexFeatureFlags.EnableSharedElementTransitions =
+                intent.requireBooleanExtra(POKEDEX_ENABLE_SHARED_ELEMENT_TRANSITIONS)
+        } else {
+            if (PokedexFeatureFlags.EnableSharedElementTransitions) {
+                onTransformationEndContainerApplyParams(this)
+                setupSharedElementTransitionListeners()
+            }
+        }
+    }
+
     private fun bindViews() {
-        binding.arrow.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        binding.pokedexDetailsBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         binding.name.text = pokemon.name
         binding.bindPokemonImage(
-            url = pokemon.imageUrl,
+            model = pokemon.imageAsGlideModel(binding.root.context),
             onImageReady = { drawable ->
                 if (drawable !is BitmapDrawable) return@bindPokemonImage
                 lifecycleScope.launch { binding.header.bindPalette(drawable.bitmap) }
             },
         )
+    }
+
+    private fun setupSharedElementTransitionListeners() {
+        val sharedElementTransitionListener =
+            object : Transition.TransitionListener {
+                override fun onTransitionStart(transition: Transition) {
+                    Log.d("DetailActivity", "onTransitionStart $transition")
+                    binding.transitionStatus.text = DETAILS_TRANSITION_ACTIVE
+                }
+
+                override fun onTransitionEnd(transition: Transition) {
+                    Log.d("DetailActivity", "onTransitionEnd $transition")
+                    binding.transitionStatus.text = DETAILS_TRANSITION_INACTIVE
+                    endDetailsTransitionTrace()
+                }
+
+                override fun onTransitionCancel(transition: Transition?) {}
+
+                override fun onTransitionPause(transition: Transition?) {}
+
+                override fun onTransitionResume(transition: Transition?) {}
+            }
+
+        window.sharedElementEnterTransition?.addListener(sharedElementTransitionListener)
+        window.sharedElementReturnTransition?.addListener(sharedElementTransitionListener)
+    }
+
+    override fun onEnterAnimationComplete() {
+        Log.d("DetailActivity", "onEnterAnimationComplete")
+        // onEnterAnimationComplete can get called multiple times when we have more than one
+        //  transition, which is the case for shared element. For shared element, we rely on the
+        //  transition listeners to update the status instead.
+        if (!PokedexFeatureFlags.EnableSharedElementTransitions) {
+            binding.transitionStatus.text = DETAILS_TRANSITION_INACTIVE
+            endDetailsTransitionTrace()
+        }
+    }
+
+    private fun endDetailsTransitionTrace() {
+        if (transitionTraceCookie != -1) {
+            Trace.endAsyncSection(NAVIGATION_TRANSITION_TRACE_NAME, transitionTraceCookie)
+            transitionTraceCookie = -1
+        }
     }
 
     private fun observeViewModel() {
@@ -163,11 +262,28 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
     }
 
     companion object {
+        const val NAVIGATION_TRANSITION_TRACE_NAME = "Pokedex Details Navigation Transition"
         internal const val EXTRA_POKEMON = "EXTRA_POKEMON"
+        internal const val TRACE_COOKIE = "TRACE_COOKIE"
+        private const val DETAILS_TRANSITION_ACTIVE = "pokedex-details-transition-active-true"
+        private const val DETAILS_TRANSITION_INACTIVE = "pokedex-details-transition-active-false"
 
-        fun startActivity(transformationLayout: TransformationLayout, pokemon: Pokemon) =
+        fun startActivity(context: Context, pokemon: Pokemon, traceCookie: Int) {
+            context.intentOf<DetailActivity> {
+                putExtra(EXTRA_POKEMON to pokemon)
+                putExtra(TRACE_COOKIE to traceCookie)
+                startActivity(context)
+            }
+        }
+
+        fun startActivityWithTransition(
+            transformationLayout: TransformationLayout,
+            pokemon: Pokemon,
+            traceCookie: Int,
+        ) =
             transformationLayout.context.intentOf<DetailActivity> {
                 putExtra(EXTRA_POKEMON to pokemon)
+                putExtra(TRACE_COOKIE to traceCookie)
                 TransformationCompat.startActivity(transformationLayout, intent)
             }
     }
@@ -203,11 +319,11 @@ private fun RibbonRecyclerView.bindPokemonTypes(types: List<PokemonInfo.TypeResp
 }
 
 private fun ActivityDetailBinding.bindPokemonImage(
-    url: String,
+    model: Any,
     onImageReady: (Drawable) -> Unit = {},
 ) {
     Glide.with(root.context)
-        .load(url)
+        .load(model)
         .listener(
             PokemonGlideRequestListener(onResourceReady = { resource -> onImageReady(resource) })
         )
