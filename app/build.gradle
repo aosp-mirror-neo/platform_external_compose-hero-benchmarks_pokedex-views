@@ -25,8 +25,7 @@ plugins {
 android {
   namespace = "com.skydoves.pokedex"
 
-  compileSdk = 35
-
+  compileSdk { version = release(35) }
   defaultConfig {
     consumerProguardFile("proguard-rules.pro")
     // We don't export schemas, but Room's Gradle plugin doesn't know that. We use the project
