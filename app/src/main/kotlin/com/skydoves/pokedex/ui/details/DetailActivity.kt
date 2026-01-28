@@ -203,6 +203,7 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
                             binding.height.text = pokemonInfo.getHeightString()
                             binding.ribbonRecyclerView.bindPokemonTypes(pokemonInfo.types)
                             binding.bindProgressBars(pokemonInfo)
+                            reportFullyDrawn()
                         }
                     }
                 }

@@ -46,8 +46,10 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-class PokemonAdapter(private val onItemClicked: (Pokemon, TransformationLayout?) -> Unit) :
-    ListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(diffUtil) {
+class PokemonAdapter(
+    private val onItemClicked: (Pokemon, TransformationLayout?) -> Unit,
+    private val fullyDrawnReporter: () -> Unit,
+) : ListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(diffUtil) {
 
     private var onClickedAt = 0L
     private var adapterCoroutineScope: CoroutineScope? = null
@@ -140,6 +142,8 @@ class PokemonAdapter(private val onItemClicked: (Pokemon, TransformationLayout?)
                 .listener(glideRequestListener)
                 .into(binding.image)
             binding.name.text = pokemon.name
+
+            fullyDrawnReporter.invoke()
         }
     }
 

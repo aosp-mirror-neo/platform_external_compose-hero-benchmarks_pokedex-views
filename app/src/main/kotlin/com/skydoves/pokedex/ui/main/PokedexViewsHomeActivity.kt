@@ -107,7 +107,11 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
                     DetailActivity.startActivity(this, pokemon, traceCookie = transitionTraceCookie)
                 }
             }
-        adapter = PokemonAdapter(onItemClicked = onItemClicked)
+        adapter =
+            PokemonAdapter(
+                onItemClicked = onItemClicked,
+                fullyDrawnReporter = { reportFullyDrawn() },
+            )
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
 
