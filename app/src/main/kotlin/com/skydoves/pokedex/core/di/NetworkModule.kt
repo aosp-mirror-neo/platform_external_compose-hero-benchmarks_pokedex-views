@@ -43,31 +43,12 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.mockwebserver.MockWebServer
-import okhttp3.tls.HandshakeCertificates
-import okhttp3.tls.HeldCertificate
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 class NetworkModule(private val json: Json, private val networkCoroutineContext: CoroutineContext) {
-    // Android O+ prohibits CLEARTEXT communication, even to localhost. We generate certificates
-    // for our mock server and request client to authenticate them.
-    val localhostCertificates by lazy {
-        val rootCertificate =
-            HeldCertificate.Builder().certificateAuthority(maxIntermediateCas = 0).build()
-        val localhostCertificate =
-            HeldCertificate.Builder()
-                .addSubjectAlternativeName("localhost")
-                .signedBy(rootCertificate)
-                .build()
-        HandshakeCertificates.Builder()
-            .addTrustedCertificate(rootCertificate.certificate)
-            .heldCertificate(localhostCertificate)
-            .build()
-    }
-
     val mockServer: MockWebServer by lazy {
         pokedexMockWebServer(json).apply {
-            useHttps(localhostCertificates.sslSocketFactory(), false)
             // Starting the server requires a network operation. This can't happen on the main
             // thread, so we execute this in a blocking manner.
             runBlocking(networkCoroutineContext) { start() }
@@ -84,10 +65,6 @@ class NetworkModule(private val json: Json, private val networkCoroutineContext:
         return OkHttpClient.Builder()
             .addNetworkInterceptor(
                 HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
-            )
-            .sslSocketFactory(
-                sslSocketFactory = localhostCertificates.sslSocketFactory(),
-                trustManager = localhostCertificates.trustManager,
             )
             .build()
     }
