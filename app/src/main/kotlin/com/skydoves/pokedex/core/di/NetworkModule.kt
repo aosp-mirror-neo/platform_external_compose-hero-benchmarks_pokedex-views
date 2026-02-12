@@ -34,32 +34,21 @@ package com.skydoves.pokedex.core.di
 
 import com.skydoves.pokedex.core.service.PokedexClient
 import com.skydoves.pokedex.core.service.PokedexService
-import com.skydoves.pokedex.core.service.pokedexMockWebServer
-import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import okhttp3.mockwebserver.MockWebServer
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
-class NetworkModule(private val json: Json, private val networkCoroutineContext: CoroutineContext) {
-    val mockServer: MockWebServer by lazy {
-        pokedexMockWebServer(json).apply {
-            // Starting the server requires a network operation. This can't happen on the main
-            // thread, so we execute this in a blocking manner.
-            runBlocking(networkCoroutineContext) { start() }
+class NetworkModule(private val json: Json) {
+    private var _baseUrl: HttpUrl? = null
+    var baseUrl: HttpUrl
+        get() = _baseUrl ?: error("API url was not provided when starting activity.")
+        set(value) {
+            _baseUrl = value
         }
-    }
-    val baseUrl: HttpUrl by lazy {
-        // Prod URL: https://pokeapi.co/api/v2/
-        // Calculating the URL requires a host lookup, which is a network operation. This can't
-        // happen on the main thread, so for the initialization we block.
-        runBlocking(networkCoroutineContext) { mockServer.url("/api/v2/") }
-    }
 
     fun okHttpClientFactory(): OkHttpClient {
         return OkHttpClient.Builder()
