@@ -36,7 +36,6 @@ import com.bumptech.glide.request.target.Target
 import com.skydoves.pokedex.R
 import com.skydoves.pokedex.core.PokedexFeatureFlags
 import com.skydoves.pokedex.core.model.Pokemon
-import com.skydoves.pokedex.core.model.imageAsGlideModel
 import com.skydoves.pokedex.databinding.ItemPokemonContentBinding
 import com.skydoves.pokedex.databinding.ItemPokemonTransformationLayoutBinding
 import com.skydoves.transformationlayout.TransformationLayout
@@ -137,7 +136,7 @@ class PokemonAdapter(
 
         fun bind(pokemon: Pokemon) {
             Glide.with(binding.root.context)
-                .load(pokemon.imageAsGlideModel(binding.root.context))
+                .load(pokemon.imageUrl)
                 .placeholder(R.drawable.pokemon_preview)
                 .listener(glideRequestListener)
                 .into(binding.image)
