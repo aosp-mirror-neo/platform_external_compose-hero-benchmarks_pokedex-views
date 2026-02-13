@@ -41,7 +41,7 @@ import com.skydoves.pokedex.core.database.entitiy.PokemonInfoEntity
 @Database(
     entities = [PokemonEntity::class, PokemonInfoEntity::class],
     version = 1,
-    exportSchema = false /* We don't require schema versioning in Hero Benchmarks */
+    exportSchema = false, /* We don't require schema versioning in Hero Benchmarks */
 )
 @TypeConverters(value = [TypeResponseConverter::class, StatsResponseConverter::class])
 abstract class PokedexDatabase : RoomDatabase() {

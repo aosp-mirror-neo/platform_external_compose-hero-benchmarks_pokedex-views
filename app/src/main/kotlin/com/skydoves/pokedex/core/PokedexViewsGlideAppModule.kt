@@ -34,7 +34,7 @@ class PokedexViewsGlideAppModule : LibraryGlideModule() {
         registry.replace<GlideUrl, InputStream>(
             /* modelClass = */ GlideUrl::class.java,
             /* dataClass = */ InputStream::class.java,
-            /* factory = */ loaderFactory
+            /* factory = */ loaderFactory,
         )
     }
 }
