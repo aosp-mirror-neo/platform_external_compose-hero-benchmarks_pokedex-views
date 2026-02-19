@@ -21,8 +21,12 @@ import android.transition.Transition
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -32,6 +36,7 @@ import androidx.tracing.trace
 import com.skydoves.baserecyclerviewadapter.RecyclerViewPaginator
 import com.skydoves.pokedex.R
 import com.skydoves.pokedex.core.PokedexFeatureFlags
+import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_API_URL
 import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_ENABLE_SHARED_ELEMENT_TRANSITIONS
 import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_ENABLE_TRANSFORMATION_LAYOUT
 import com.skydoves.pokedex.core.PokedexViewsViewModelProviderFactory
@@ -46,6 +51,7 @@ import com.skydoves.transformationlayout.onTransformationStartContainer
 import kotlin.random.Random
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import okhttp3.HttpUrl.Companion.toHttpUrl
 
 class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
 
@@ -64,7 +70,11 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
     private var transitionTraceCookie = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         trace("PokedexActivity Setup") {
+            check(intent.hasExtra(POKEDEX_API_URL)) { "apiUrl must be set" }
+            ModuleLocator.networkModule.baseUrl =
+                intent.getStringExtra(POKEDEX_API_URL)!!.toHttpUrl()
             PokedexFeatureFlags.EnableTransformationLayout =
                 intent.requireBooleanExtra(POKEDEX_ENABLE_TRANSFORMATION_LAYOUT)
             PokedexFeatureFlags.EnableSharedElementTransitions =
@@ -102,9 +112,20 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
                     DetailActivity.startActivity(this, pokemon, traceCookie = transitionTraceCookie)
                 }
             }
-        adapter = PokemonAdapter(onItemClicked = onItemClicked)
+        adapter =
+            PokemonAdapter(
+                onItemClicked = onItemClicked,
+                fullyDrawnReporter = { reportFullyDrawn() },
+            )
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(activityMainBinding.root) { _, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            activityMainBinding.appBarLayout.updatePadding(top = insets.top)
+            activityMainBinding.PokedexList.updatePadding(bottom = insets.bottom)
+            WindowInsetsCompat.toWindowInsetsCompat(windowInsets.toWindowInsets()!!)
+        }
 
         setupRecyclerView()
         observeViewModel()
