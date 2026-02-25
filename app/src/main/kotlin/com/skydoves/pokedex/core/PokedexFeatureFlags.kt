@@ -16,6 +16,8 @@
 
 package com.skydoves.pokedex.core
 
+import com.skydoves.pokedex.core.PokedexFeatureFlags.EnableTransformationLayout
+
 /** Contains feature flags for the Pokedex hero benchmark target */
 object PokedexFeatureFlags {
     /**
@@ -31,18 +33,9 @@ object PokedexFeatureFlags {
     var EnableSharedElementTransitions = true
         get() = EnableTransformationLayout && field
 
-    /**
-     * Whether to fetch pokemon images from disk instead of the network. Requires storing images in
-     * the app's files directory before the startup, e.g. through PokedexSetupActivity.
-     *
-     * Disabling this flag means loading images from the network. If using the local mock web
-     * server, that means generating the gradient images on the fly, which can incur significant
-     * performance impact. Disable the flag to simulate a worse performance of the app.
-     */
-    var FetchPokemonImagesFromDisk = true
-
     object Keys {
         const val POKEDEX_ENABLE_TRANSFORMATION_LAYOUT = "enableSharedTransitionScope"
         const val POKEDEX_ENABLE_SHARED_ELEMENT_TRANSITIONS = "enableSharedElementTransitions"
+        const val POKEDEX_API_URL = "apiUrl"
     }
 }
