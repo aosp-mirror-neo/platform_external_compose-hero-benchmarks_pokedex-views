@@ -17,6 +17,7 @@
 package com.skydoves.pokedex.core.di
 
 import android.content.Context
+import kotlin.getValue
 
 object ModuleLocator {
 
@@ -32,7 +33,12 @@ object ModuleLocator {
 
     val serializationModule by lazy { SerializationModule() }
     val dispatchersModule by lazy { DispatchersModule() }
-    val networkModule by lazy { NetworkModule(json = serializationModule.json) }
+    val networkModule by lazy {
+        NetworkModule(
+            json = serializationModule.json,
+            networkCoroutineContext = dispatchersModule.io,
+        )
+    }
     val databaseModule by lazy {
         DatabaseModule(
             context = requireNotNull(context) { "Please attach the context using attach" },

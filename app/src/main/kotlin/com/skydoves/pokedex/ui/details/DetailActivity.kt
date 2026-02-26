@@ -44,7 +44,6 @@ import com.skydoves.bundler.bundleNonNull
 import com.skydoves.bundler.intentOf
 import com.skydoves.pokedex.R
 import com.skydoves.pokedex.core.PokedexFeatureFlags
-import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_API_URL
 import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_ENABLE_SHARED_ELEMENT_TRANSITIONS
 import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_ENABLE_TRANSFORMATION_LAYOUT
 import com.skydoves.pokedex.core.PokedexViewsViewModelProviderFactory
@@ -52,6 +51,7 @@ import com.skydoves.pokedex.core.database.entitiy.getPokemonImageUrlByName
 import com.skydoves.pokedex.core.di.ModuleLocator
 import com.skydoves.pokedex.core.model.Pokemon
 import com.skydoves.pokedex.core.model.PokemonInfo
+import com.skydoves.pokedex.core.model.imageAsGlideModel
 import com.skydoves.pokedex.databinding.ActivityDetailBinding
 import com.skydoves.pokedex.ui.main.PokemonGlideRequestListener
 import com.skydoves.pokedex.utils.PokemonTypeUtils
@@ -67,7 +67,6 @@ import com.skydoves.transformationlayout.TransformationLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl.Companion.toHttpUrl
 
 class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
 
@@ -89,11 +88,6 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         trace("DetailActivity Setup") {
-            if (intent.hasExtra(POKEDEX_API_URL)) {
-                ModuleLocator.networkModule.baseUrl =
-                    intent.getStringExtra(POKEDEX_API_URL)!!.toHttpUrl()
-            }
-
             val startDestination = intent.getStringExtra("startDestination")
             setupSharedElementTransition(startDestination)
             transitionTraceCookie = intent.getIntExtra(TRACE_COOKIE, -1)
@@ -116,8 +110,10 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
         _pokemon =
             if (startDestination == "details") {
                 lazy {
-                    val name = "Ablazeon"
-                    Pokemon(name = name, imageUrl = getPokemonImageUrlByName(name).toString())
+                    Pokemon(
+                        name = "Bulbasaur",
+                        imageUrl = getPokemonImageUrlByName("Bulbasaur").toString(),
+                    )
                 }
             } else {
                 bundleNonNull<Pokemon>(EXTRA_POKEMON)
@@ -145,7 +141,7 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
         binding.pokedexDetailsBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         binding.name.text = pokemon.name
         binding.bindPokemonImage(
-            model = pokemon.imageUrl,
+            model = pokemon.imageAsGlideModel(binding.root.context),
             onImageReady = { drawable ->
                 if (drawable !is BitmapDrawable) return@bindPokemonImage
                 lifecycleScope.launch { binding.header.bindPalette(drawable.bitmap) }
@@ -207,7 +203,6 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
                             binding.height.text = pokemonInfo.getHeightString()
                             binding.ribbonRecyclerView.bindPokemonTypes(pokemonInfo.types)
                             binding.bindProgressBars(pokemonInfo)
-                            reportFullyDrawn()
                         }
                     }
                 }

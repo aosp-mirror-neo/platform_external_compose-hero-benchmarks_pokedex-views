@@ -32,6 +32,10 @@
 
 package com.skydoves.pokedex.core.model
 
+import com.skydoves.pokedex.core.model.PokemonInfo.Companion.MAX_ATTACK
+import com.skydoves.pokedex.core.model.PokemonInfo.Companion.MAX_DEFENSE
+import com.skydoves.pokedex.core.model.PokemonInfo.Companion.MAX_HP
+import com.skydoves.pokedex.core.model.PokemonInfo.Companion.MAX_SPEED
 import kotlin.random.Random
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -101,3 +105,69 @@ data class PokemonInfo(
         const val MAX_EXP = 1000
     }
 }
+
+fun PokemonInfo.StatsResponse.maxOrRandom(): Int =
+    when (stat.name) {
+        "hp" -> MAX_HP
+        "attack" -> MAX_ATTACK
+        "speed" -> MAX_SPEED
+        "defense" -> MAX_DEFENSE
+        else -> Random.nextInt(until = 300)
+    }
+
+fun PokemonInfo.StatsResponse.formatOrNull(): String? =
+    when (stat.name) {
+        "hp" -> " $baseStat/${MAX_HP}"
+        "attack" -> " $baseStat/${MAX_ATTACK}"
+        "speed" -> " $baseStat/${MAX_SPEED}"
+        "defense" -> " $baseStat/${MAX_DEFENSE}"
+        else -> null
+    }
+
+fun fakePokemonInfo(id: Int, name: String): PokemonInfo {
+    val random = Random(name.hashCode())
+    return PokemonInfo(
+        id = id,
+        name = name,
+        height = random.nextInt(10, 50),
+        weight = random.nextInt(80, 300),
+        experience = random.nextInt(0, 100),
+        types = listOf(FakePokemonTypeResponse(random)),
+        stats = listOf(fakePokemonStats(random)),
+    )
+}
+
+var FakePokemonStats = listOf("hp", "attack", "speed", "defense")
+
+fun fakePokemonStats(random: Random = Random): PokemonInfo.StatsResponse {
+    val stat = PokemonInfo.Stat(FakePokemonStats.random())
+    val statMax =
+        when (stat.name) {
+            "hp" -> MAX_HP
+            "attack" -> MAX_ATTACK
+            "speed" -> MAX_SPEED
+            "defense" -> MAX_DEFENSE
+            else -> 100
+        }
+    return PokemonInfo.StatsResponse(
+        baseStat = random.nextInt(until = statMax),
+        effort = random.nextInt(),
+        stat = stat,
+    )
+}
+
+var FakePokemonTypes =
+    listOf(
+        "A slow one",
+        "A fast one",
+        "A big one",
+        "An adorable one",
+        "A tiny one",
+        "A software-developing one",
+    )
+
+fun FakePokemonTypeResponse(random: Random = Random) =
+    PokemonInfo.TypeResponse(
+        slot = 0,
+        type = PokemonInfo.Type(name = FakePokemonTypes.random(random)),
+    )

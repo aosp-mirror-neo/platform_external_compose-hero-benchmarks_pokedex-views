@@ -30,25 +30,17 @@
  * limitations under the License.
  */
 
-package com.skydoves.pokedex.core.model
+package com.skydoves.pokedex.core.repository.details
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.skydoves.pokedex.core.model.PokemonInfo
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
-@Serializable
-data class PokemonResponse(
-    @SerialName(value = "count") val count: Int,
-    @SerialName(value = "next") val next: String?,
-    @SerialName(value = "previous") val previous: String?,
-    @SerialName(value = "results") val results: List<PokemonNetworkModel>,
-)
+class FakeDetailsRepository : DetailsRepository {
 
-/**
- * Create a [PokemonResponse] with a list of [pokemons].
- *
- * @param pokemons The pokemons to be contained in the response, a list of generated items with fake
- *   data by default.
- */
-fun fakePokemonResponse(
-    pokemons: List<PokemonNetworkModel> = fakePokemonNetworkModels(AllPokemonNames)
-) = PokemonResponse(count = pokemons.size, previous = null, next = null, results = pokemons)
+    override fun fetchPokemonInfo(
+        name: String,
+        onComplete: () -> Unit,
+        onError: (String?) -> Unit,
+    ): Flow<PokemonInfo> = flowOf()
+}
