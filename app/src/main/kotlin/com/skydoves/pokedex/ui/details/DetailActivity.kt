@@ -89,9 +89,10 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         trace("DetailActivity Setup") {
-            check(intent.hasExtra(POKEDEX_API_URL)) { "apiUrl must be set" }
-            ModuleLocator.networkModule.baseUrl =
-                intent.getStringExtra(POKEDEX_API_URL)!!.toHttpUrl()
+            if (intent.hasExtra(POKEDEX_API_URL)) {
+                ModuleLocator.networkModule.baseUrl =
+                    intent.getStringExtra(POKEDEX_API_URL)!!.toHttpUrl()
+            }
 
             val startDestination = intent.getStringExtra("startDestination")
             setupSharedElementTransition(startDestination)
