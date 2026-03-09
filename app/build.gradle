@@ -17,7 +17,6 @@
 plugins {
     id("AndroidXPlugin")
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("androidx.room") version "2.7.0"
     alias(libs.plugins.kotlinSerialization)
@@ -26,8 +25,7 @@ plugins {
 android {
   namespace = "com.skydoves.pokedex"
 
-  compileSdk = 35
-
+  compileSdk { version = release(35) }
   defaultConfig {
     consumerProguardFile("proguard-rules.pro")
     // We don't export schemas, but Room's Gradle plugin doesn't know that. We use the project
@@ -52,7 +50,6 @@ dependencies {
     implementation("androidx.startup:startup-runtime:1.2.0")
     implementation("androidx.palette:palette-ktx:1.0.0")
     implementation("androidx.tracing:tracing:1.3.0")
-    implementation(project(":compose:integration-tests:hero:hero-common:hero-common-implementation"))
 
     // Database
     implementation("androidx.room:room-runtime:2.7.0")
