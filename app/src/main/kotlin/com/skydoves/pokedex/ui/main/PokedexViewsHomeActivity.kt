@@ -36,6 +36,7 @@ import androidx.tracing.trace
 import com.skydoves.baserecyclerviewadapter.RecyclerViewPaginator
 import com.skydoves.pokedex.R
 import com.skydoves.pokedex.core.PokedexFeatureFlags
+import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_API_URL
 import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_ENABLE_SHARED_ELEMENT_TRANSITIONS
 import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_ENABLE_TRANSFORMATION_LAYOUT
 import com.skydoves.pokedex.core.PokedexViewsViewModelProviderFactory
@@ -50,6 +51,7 @@ import com.skydoves.transformationlayout.onTransformationStartContainer
 import kotlin.random.Random
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import okhttp3.HttpUrl.Companion.toHttpUrl
 
 class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
 
@@ -70,6 +72,9 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         trace("PokedexActivity Setup") {
+            check(intent.hasExtra(POKEDEX_API_URL)) { "apiUrl must be set" }
+            ModuleLocator.networkModule.baseUrl =
+                intent.getStringExtra(POKEDEX_API_URL)!!.toHttpUrl()
             PokedexFeatureFlags.EnableTransformationLayout =
                 intent.requireBooleanExtra(POKEDEX_ENABLE_TRANSFORMATION_LAYOUT)
             PokedexFeatureFlags.EnableSharedElementTransitions =
@@ -107,7 +112,11 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
                     DetailActivity.startActivity(this, pokemon, traceCookie = transitionTraceCookie)
                 }
             }
-        adapter = PokemonAdapter(onItemClicked = onItemClicked)
+        adapter =
+            PokemonAdapter(
+                onItemClicked = onItemClicked,
+                fullyDrawnReporter = { reportFullyDrawn() },
+            )
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
 
