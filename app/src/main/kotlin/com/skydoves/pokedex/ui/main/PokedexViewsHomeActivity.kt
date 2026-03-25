@@ -20,6 +20,8 @@ import android.os.Bundle
 import android.transition.Transition
 import android.util.Log
 import android.view.View
+import android.view.View.OVER_SCROLL_ALWAYS
+import android.view.View.OVER_SCROLL_NEVER
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -186,6 +188,11 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
 
     private fun setupRecyclerView() {
         activityMainBinding.PokedexList.apply {
+            overScrollMode =
+                when (PokedexFeatureFlags.DisableOverscrollEffect) {
+                    true -> OVER_SCROLL_NEVER
+                    false -> OVER_SCROLL_ALWAYS
+                }
             this.adapter = this@PokedexViewsHomeActivity.adapter
             layoutManager = GridLayoutManager(this@PokedexViewsHomeActivity, 2)
         }
