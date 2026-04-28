@@ -36,7 +36,6 @@ import com.bumptech.glide.request.target.Target
 import com.skydoves.pokedex.R
 import com.skydoves.pokedex.core.PokedexFeatureFlags
 import com.skydoves.pokedex.core.model.Pokemon
-import com.skydoves.pokedex.core.model.imageAsGlideModel
 import com.skydoves.pokedex.databinding.ItemPokemonContentBinding
 import com.skydoves.pokedex.databinding.ItemPokemonTransformationLayoutBinding
 import com.skydoves.transformationlayout.TransformationLayout
@@ -46,8 +45,10 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-class PokemonAdapter(private val onItemClicked: (Pokemon, TransformationLayout?) -> Unit) :
-    ListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(diffUtil) {
+class PokemonAdapter(
+    private val onItemClicked: (Pokemon, TransformationLayout?) -> Unit,
+    private val fullyDrawnReporter: () -> Unit,
+) : ListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(diffUtil) {
 
     private var onClickedAt = 0L
     private var adapterCoroutineScope: CoroutineScope? = null
@@ -135,11 +136,13 @@ class PokemonAdapter(private val onItemClicked: (Pokemon, TransformationLayout?)
 
         fun bind(pokemon: Pokemon) {
             Glide.with(binding.root.context)
-                .load(pokemon.imageAsGlideModel(binding.root.context))
+                .load(pokemon.imageUrl)
                 .placeholder(R.drawable.pokemon_preview)
                 .listener(glideRequestListener)
                 .into(binding.image)
             binding.name.text = pokemon.name
+
+            fullyDrawnReporter.invoke()
         }
     }
 
