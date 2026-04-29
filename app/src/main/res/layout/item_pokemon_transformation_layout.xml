@@ -14,14 +14,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<resources>
-  <string name="app_name">Views Benchmark Target</string>
-  <string name="weight">Weight</string>
-  <string name="height">Height</string>
-  <string name="base_stats">Base Stats</string>
-  <string name="hp">HP</string>
-  <string name="atk">ATK</string>
-  <string name="def">DEF</string>
-  <string name="spd">SPD</string>
-  <string name="exp">EXP</string>
-</resources>
+
+<com.skydoves.transformationlayout.TransformationLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/transformation_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:transformation_duration="@integer/shared_element_transition_duration_millis">
+
+  <include android:id="@+id/pokemon_item_content" layout="@layout/item_pokemon_content" />
+
+</com.skydoves.transformationlayout.TransformationLayout>
