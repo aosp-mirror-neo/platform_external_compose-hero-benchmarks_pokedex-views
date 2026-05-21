@@ -44,6 +44,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PokemonAdapter(
     private val onItemClicked: (Pokemon, TransformationLayout?) -> Unit,
@@ -120,7 +121,9 @@ class PokemonAdapter(
                         val palette = Palette.from(bitmap).generate()
                         val rgb = palette.dominantSwatch?.rgb
                         if (rgb != null) {
-                            binding.cardView.setCardBackgroundColor(rgb)
+                            withContext(Dispatchers.Main) {
+                                binding.cardView.setCardBackgroundColor(rgb)
+                            }
                         }
                     }
                 }
