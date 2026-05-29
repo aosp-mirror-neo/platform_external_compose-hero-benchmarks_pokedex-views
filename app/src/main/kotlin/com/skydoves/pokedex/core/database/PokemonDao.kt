@@ -44,9 +44,8 @@ interface PokemonDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPokemonList(pokemonList: List<PokemonEntity>)
 
-    @Query("SELECT * FROM PokemonEntity") suspend fun getPokemonList(): List<PokemonEntity>
-
-    @Query("SELECT * FROM PokemonEntity") suspend fun getAllPokemonList(): List<PokemonEntity>
+    @Query("SELECT * FROM PokemonEntity ORDER BY name ASC")
+    suspend fun getPokemonList(): List<PokemonEntity>
 
     @Query("DELETE FROM PokemonEntity") suspend fun deleteAll()
 }
