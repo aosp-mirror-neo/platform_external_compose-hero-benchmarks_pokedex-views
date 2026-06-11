@@ -33,6 +33,16 @@ object PokedexFeatureFlags {
     var EnableSharedElementTransitions = true
         get() = EnableTransformationLayout && field
 
+    /**
+     * Whether to explicitly disable the overscroll effect for the hierarchy. Overscroll relies on
+     * shaders on newer API levels, which need to be compiled. In benchmarks, we kill the shader
+     * cache, which means that we incur a significant cost when initially compiling the shader.
+     *
+     * Inconsistencies in adb input injection mean that we sometimes end up hitting the bounds of
+     * the list. We disable overscroll by default to stabilize benchmark results.
+     */
+    var DisableOverscrollEffect = true
+
     object Keys {
         const val POKEDEX_ENABLE_TRANSFORMATION_LAYOUT = "enableSharedTransitionScope"
         const val POKEDEX_ENABLE_SHARED_ELEMENT_TRANSITIONS = "enableSharedElementTransitions"
