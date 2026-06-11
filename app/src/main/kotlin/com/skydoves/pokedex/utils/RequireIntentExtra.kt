@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-package com.skydoves.pokedex.core.model
+package com.skydoves.pokedex.utils
 
-import kotlinx.serialization.Serializable
+import android.content.Intent
 
-@Serializable class PokemonNetworkModel(val name: String)
+internal fun Intent.requireBooleanExtra(
+    name: String,
+    lazyMessage: () -> String = { "Did not find extra $name in intent." },
+): Boolean {
+    val hasExtra = hasExtra(name)
+    if (!hasExtra) {
+        throw IllegalArgumentException(lazyMessage())
+    }
+    return getBooleanExtra(name, false)
+}

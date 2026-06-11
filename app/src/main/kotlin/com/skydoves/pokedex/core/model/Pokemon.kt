@@ -39,14 +39,11 @@ import kotlinx.serialization.Serializable
 
 @SuppressLint("BanParcelableUsage") // TODO(b/374318532): Migrate to VersionedParcelable
 @Serializable
-data class Pokemon(var page: Int = 0, val name: String, val imageUrl: String) : Parcelable {
+data class Pokemon(val name: String, val imageUrl: String) : Parcelable {
 
-    constructor(
-        parcel: Parcel
-    ) : this(parcel.readInt(), parcel.readString()!!, parcel.readString()!!)
+    constructor(parcel: Parcel) : this(parcel.readString()!!, parcel.readString()!!)
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(page)
         parcel.writeString(name)
         parcel.writeString(imageUrl)
     }
