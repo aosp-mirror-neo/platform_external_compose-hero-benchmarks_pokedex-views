@@ -37,7 +37,6 @@ import com.skydoves.pokedex.core.database.PokemonDao
 import com.skydoves.pokedex.core.database.entitiy.asDatabaseEntity
 import com.skydoves.pokedex.core.database.entitiy.asPresentationModel
 import com.skydoves.pokedex.core.service.PokedexClient
-import kotlin.onSuccess
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -61,16 +60,16 @@ class HomeRepositoryImpl(
     ) =
         flow {
                 // Start out by fetching cached data
-                emit(pokemonDao.getPokemonList().asPresentationModel(apiUrl, page))
+                val cachedPokemon = pokemonDao.getPokemonList().asPresentationModel(apiUrl)
+                emit(cachedPokemon)
                 // Afterwards, we'll make a request to the API to still get new data
                 val networkPokemonResponse = pokedexClient.fetchPokemonList(page = page)
-                println("networkPokemonResponse: $networkPokemonResponse")
                 networkPokemonResponse
                     .onSuccess { data ->
                         val networkFetchedPokemons = data.results
                         pokemonDao.insertPokemonList(networkFetchedPokemons.asDatabaseEntity())
                         // We re-query the database to account for concurrent modifications
-                        emit(pokemonDao.getAllPokemonList().asPresentationModel(apiUrl, page))
+                        emit(pokemonDao.getPokemonList().asPresentationModel(apiUrl))
                     }
                     .onFailure { throwable -> onError(throwable.message) }
             }
