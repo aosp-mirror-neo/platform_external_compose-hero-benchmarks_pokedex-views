@@ -27,6 +27,12 @@ object PokedexFeatureFlags {
     var EnableTransformationLayout = true
 
     /**
+     * Whether to enable Palette color extraction from loaded bitmaps. Disabled by default for
+     * benchmark performance and stability.
+     */
+    var EnablePaletteExtraction = false
+
+    /**
      * Whether to enable shared element transitions between the activities.
      * [EnableTransformationLayout] must be set to true, otherwise this flag will be false.
      */

@@ -115,6 +115,8 @@ class PokemonAdapter(
         private val glideRequestListener =
             PokemonGlideRequestListener(
                 onResourceReady = { drawable ->
+                    if (!PokedexFeatureFlags.EnablePaletteExtraction)
+                        return@PokemonGlideRequestListener
                     if (drawable !is BitmapDrawable) return@PokemonGlideRequestListener
                     val bitmap = drawable.bitmap
                     adapterCoroutineScope!!.launch(Dispatchers.IO) {
@@ -138,11 +140,14 @@ class PokemonAdapter(
         }
 
         fun bind(pokemon: Pokemon) {
-            Glide.with(binding.root.context)
-                .load(pokemon.imageUrl)
-                .placeholder(R.drawable.pokemon_preview)
-                .listener(glideRequestListener)
-                .into(binding.image)
+            var requestBuilder =
+                Glide.with(binding.root.context)
+                    .load(pokemon.imageUrl)
+                    .placeholder(R.drawable.pokemon_preview)
+            if (PokedexFeatureFlags.EnablePaletteExtraction) {
+                requestBuilder = requestBuilder.listener(glideRequestListener)
+            }
+            requestBuilder.into(binding.image)
             binding.name.text = pokemon.name
 
             fullyDrawnReporter.invoke()
