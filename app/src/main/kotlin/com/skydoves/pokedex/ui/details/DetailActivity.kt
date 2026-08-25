@@ -330,6 +330,7 @@ private fun ActivityDetailBinding.bindPokemonImage(
 ) {
     Glide.with(root.context)
         .load(model)
+        .dontAnimate()
         .listener(
             PokemonGlideRequestListener(onResourceReady = { resource -> onImageReady(resource) })
         )

@@ -143,6 +143,7 @@ class PokemonAdapter(
             var requestBuilder =
                 Glide.with(binding.root.context)
                     .load(pokemon.imageUrl)
+                    .dontAnimate()
                     .placeholder(R.drawable.pokemon_preview)
             if (PokedexFeatureFlags.EnablePaletteExtraction) {
                 requestBuilder = requestBuilder.listener(glideRequestListener)
