@@ -25,7 +25,7 @@ plugins {
 android {
   namespace = "com.skydoves.pokedex"
 
-  compileSdk { version = release(35) }
+  compileSdk { version = release(37) { minorApiLevel = 1 } }
   defaultConfig {
     consumerProguardFile("proguard-rules.pro")
     // We don't export schemas, but Room's Gradle plugin doesn't know that. We use the project
@@ -43,7 +43,8 @@ android {
 
 dependencies {
     // AndroidX
-    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.core:core-ktx:1.17.0")
+    implementation("com.google.android.material:material:1.14.0")
     implementation("androidx.fragment:fragment-ktx:1.8.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")

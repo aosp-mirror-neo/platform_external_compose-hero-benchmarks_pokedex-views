@@ -23,10 +23,10 @@ import android.view.View
 import android.view.View.OVER_SCROLL_ALWAYS
 import android.view.View.OVER_SCROLL_NEVER
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
@@ -72,7 +72,7 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
     private var transitionTraceCookie = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        WindowCompat.enableEdgeToEdge(window)
         trace("PokedexActivity Setup") {
             check(intent.hasExtra(POKEDEX_API_URL)) { "apiUrl must be set" }
             ModuleLocator.networkModule.baseUrl =
