@@ -23,10 +23,10 @@ import android.view.View
 import android.view.View.OVER_SCROLL_ALWAYS
 import android.view.View.OVER_SCROLL_NEVER
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
@@ -72,7 +72,7 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
     private var transitionTraceCookie = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        WindowCompat.enableEdgeToEdge(window)
         trace("PokedexActivity Setup") {
             check(intent.hasExtra(POKEDEX_API_URL)) { "apiUrl must be set" }
             ModuleLocator.networkModule.baseUrl =
@@ -212,7 +212,14 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.pokemonList.collect { pokemonList -> adapter.submitList(pokemonList) }
+                    viewModel.pokemonList.collect { pokemonList ->
+                        // Ignore the initial empty list while page 0 is loading. Submitting an
+                        // empty list to an empty adapter runs the callback right away and sets
+                        // isLoading to false too early.
+                        if (pokemonList.isNotEmpty() || adapter.currentList.isNotEmpty()) {
+                            adapter.submitList(pokemonList) { viewModel.onPokemonListCommitted() }
+                        }
+                    }
                 }
                 launch {
                     viewModel.toastMessage.filterNotNull().collect { message ->

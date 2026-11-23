@@ -30,7 +30,9 @@ import kotlinx.coroutines.flow.stateIn
 
 internal class PokedexViewsHomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
 
-    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    // Start in the loading state until the initial page is committed to the RecyclerView adapter,
+    // matching HomeUiState.Loading in pokedex-compose.
+    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _toastMessage: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -44,7 +46,9 @@ internal class PokedexViewsHomeViewModel(private val homeRepository: HomeReposit
                 homeRepository.fetchPokemonList(
                     page = page,
                     onStart = { _isLoading.value = true },
-                    onComplete = { _isLoading.value = false },
+                    // Keep isLoading true until ListAdapter.submitList commits the new items to
+                    // the RecyclerView in onPokemonListCommitted().
+                    onComplete = {},
                     onError = {
                         _isLoading.value = false
                         _toastMessage.value = it
@@ -54,8 +58,14 @@ internal class PokedexViewsHomeViewModel(private val homeRepository: HomeReposit
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     @MainThread
+    fun onPokemonListCommitted() {
+        _isLoading.value = false
+    }
+
+    @MainThread
     fun fetchNextPokemonList() {
         if (!isLoading.value) {
+            _isLoading.value = true
             pokemonFetchingIndex.value++
         }
     }

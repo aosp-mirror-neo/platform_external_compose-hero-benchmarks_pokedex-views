@@ -53,21 +53,20 @@ class DetailsRepositoryImpl(
         name: String,
         onComplete: () -> Unit,
         onError: (String?) -> Unit,
-    ) =
-        flow {
-                val pokemonInfo = pokemonInfoDao.getPokemonInfo(name)
-                if (pokemonInfo == null) {
-                    val response = pokedexClient.fetchPokemonInfo(name = name)
-                    response
-                        .onSuccess { data ->
-                            pokemonInfoDao.insertPokemonInfo(data.asDatabaseEntity())
-                            emit(data)
-                        }
-                        .onFailure { throwable -> onError(throwable.message) }
-                } else {
-                    emit(pokemonInfo.asPresentationModel())
+    ) = flow {
+        val pokemonInfo = pokemonInfoDao.getPokemonInfo(name)
+        if (pokemonInfo == null) {
+            val response = pokedexClient.fetchPokemonInfo(name = name)
+            response
+                .onSuccess { data ->
+                    pokemonInfoDao.insertPokemonInfo(data.asDatabaseEntity())
+                    emit(data)
                 }
-            }
-            .onCompletion { onComplete() }
-            .flowOn(ioDispatcher)
+                .onFailure { throwable -> onError(throwable.message) }
+        } else {
+            emit(pokemonInfo.asPresentationModel())
+        }
+    }
+        .onCompletion { onComplete() }
+        .flowOn(ioDispatcher)
 }

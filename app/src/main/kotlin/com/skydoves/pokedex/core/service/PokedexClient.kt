@@ -21,13 +21,13 @@ import com.skydoves.pokedex.core.model.PokemonResponse
 
 class PokedexClient(private val pokedexService: PokedexService) {
 
-    suspend fun fetchPokemonList(page: Int): Result<PokemonResponse> =
-        kotlin.runCatching {
-            pokedexService.fetchPokemonList(limit = PAGING_SIZE, offset = page * PAGING_SIZE)
-        }
+    suspend fun fetchPokemonList(page: Int): Result<PokemonResponse> = kotlin.runCatching {
+        pokedexService.fetchPokemonList(limit = PAGING_SIZE, offset = page * PAGING_SIZE)
+    }
 
-    suspend fun fetchPokemonInfo(name: String): Result<PokemonInfo> =
-        kotlin.runCatching { pokedexService.fetchPokemonInfo(name = name) }
+    suspend fun fetchPokemonInfo(name: String): Result<PokemonInfo> = kotlin.runCatching {
+        pokedexService.fetchPokemonInfo(name = name)
+    }
 
     companion object {
         // NOTE: Keep this aligned with Pokedex-Compose's PAGING_SIZE.

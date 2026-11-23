@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
+import androidx.tracing.Trace
 import androidx.viewbinding.ViewBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -53,6 +54,15 @@ class PokemonAdapter(
 
     private var onClickedAt = 0L
     private var adapterCoroutineScope: CoroutineScope? = null
+
+    /**
+     * Tracks currently bound [PokemonViewHolder]s across bind, recycle, and detach events to
+     * compare active item counts with Compose.
+     *
+     * Note that [RecyclerView] keeps bound off-screen [PokemonViewHolder]s in `mCachedViews` before
+     * calling [onViewRecycled].
+     */
+    private var activeViewHolderCount = 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PokemonViewHolder {
         val binding: ViewBinding
@@ -95,6 +105,15 @@ class PokemonAdapter(
     override fun onBindViewHolder(holder: PokemonViewHolder, position: Int) =
         holder.bind(getItem(position))
 
+    override fun onViewRecycled(holder: PokemonViewHolder) {
+        super.onViewRecycled(holder)
+        if (holder.isBound) {
+            holder.isBound = false
+            activeViewHolderCount--
+            Trace.setCounter(ACTIVE_GRID_ITEMS_COUNTER_NAME, activeViewHolderCount)
+        }
+    }
+
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         adapterCoroutineScope = MainScope()
@@ -102,6 +121,10 @@ class PokemonAdapter(
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
+        if (activeViewHolderCount != 0) {
+            activeViewHolderCount = 0
+            Trace.setCounter(ACTIVE_GRID_ITEMS_COUNTER_NAME, 0)
+        }
         adapterCoroutineScope?.cancel()
         adapterCoroutineScope = null
     }
@@ -112,9 +135,19 @@ class PokemonAdapter(
         private val onItemClicked: (Pokemon) -> Unit,
     ) : RecyclerView.ViewHolder(root) {
 
+        /**
+         * Tracks whether this [PokemonViewHolder] is currently counted in [activeViewHolderCount].
+         *
+         * Avoids double-counting if a bound ViewHolder is rebound in-place without an intervening
+         * [onViewRecycled] call.
+         */
+        internal var isBound = false
+
         private val glideRequestListener =
             PokemonGlideRequestListener(
                 onResourceReady = { drawable ->
+                    if (!PokedexFeatureFlags.EnablePaletteExtraction)
+                        return@PokemonGlideRequestListener
                     if (drawable !is BitmapDrawable) return@PokemonGlideRequestListener
                     val bitmap = drawable.bitmap
                     adapterCoroutineScope!!.launch(Dispatchers.IO) {
@@ -138,11 +171,20 @@ class PokemonAdapter(
         }
 
         fun bind(pokemon: Pokemon) {
-            Glide.with(binding.root.context)
-                .load(pokemon.imageUrl)
-                .placeholder(R.drawable.pokemon_preview)
-                .listener(glideRequestListener)
-                .into(binding.image)
+            if (!isBound) {
+                isBound = true
+                activeViewHolderCount++
+                Trace.setCounter(ACTIVE_GRID_ITEMS_COUNTER_NAME, activeViewHolderCount)
+            }
+            var requestBuilder =
+                Glide.with(binding.root.context)
+                    .load(pokemon.imageUrl)
+                    .dontAnimate()
+                    .placeholder(R.drawable.pokemon_preview)
+            if (PokedexFeatureFlags.EnablePaletteExtraction) {
+                requestBuilder = requestBuilder.listener(glideRequestListener)
+            }
+            requestBuilder.into(binding.image)
             binding.name.text = pokemon.name
 
             fullyDrawnReporter.invoke()
@@ -150,6 +192,8 @@ class PokemonAdapter(
     }
 
     companion object {
+        private const val ACTIVE_GRID_ITEMS_COUNTER_NAME = "pokedex:grid:items:active"
+
         private val diffUtil =
             object : DiffUtil.ItemCallback<Pokemon>() {
 

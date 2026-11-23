@@ -147,6 +147,7 @@ class DetailActivity : AppCompatActivity(R.layout.activity_detail) {
         binding.bindPokemonImage(
             model = pokemon.imageUrl,
             onImageReady = { drawable ->
+                if (!PokedexFeatureFlags.EnablePaletteExtraction) return@bindPokemonImage
                 if (drawable !is BitmapDrawable) return@bindPokemonImage
                 lifecycleScope.launch { binding.header.bindPalette(drawable.bitmap) }
             },
@@ -329,6 +330,7 @@ private fun ActivityDetailBinding.bindPokemonImage(
 ) {
     Glide.with(root.context)
         .load(model)
+        .dontAnimate()
         .listener(
             PokemonGlideRequestListener(onResourceReady = { resource -> onImageReady(resource) })
         )
