@@ -195,6 +195,7 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
                 }
             this.adapter = this@PokedexViewsHomeActivity.adapter
             layoutManager = GridLayoutManager(this@PokedexViewsHomeActivity, 2)
+            itemAnimator = null
         }
         RecyclerViewPaginator(
                 recyclerView = activityMainBinding.PokedexList,
