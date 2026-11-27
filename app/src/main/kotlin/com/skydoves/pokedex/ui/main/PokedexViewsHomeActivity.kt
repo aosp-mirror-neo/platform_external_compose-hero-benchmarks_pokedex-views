@@ -36,7 +36,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.tracing.Trace
 import androidx.tracing.trace
 import com.skydoves.baserecyclerviewadapter.RecyclerViewPaginator
-import com.skydoves.pokedex.R
 import com.skydoves.pokedex.core.PokedexFeatureFlags
 import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_API_URL
 import com.skydoves.pokedex.core.PokedexFeatureFlags.Keys.POKEDEX_ENABLE_SHARED_ELEMENT_TRANSITIONS
@@ -55,7 +54,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
-class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
+class PokedexViewsHomeActivity : AppCompatActivity() {
 
     private lateinit var activityMainBinding: ActivityMainBinding
 
